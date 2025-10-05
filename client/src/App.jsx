@@ -70,7 +70,7 @@ function App() {
     studentId: '',
     faculty: '',
     year: '',
-    schedule: null,
+    interview: '',
     phone: '',
     dept1: '',
     dept2: '',
@@ -116,7 +116,7 @@ function App() {
     }
 
     if (step === 2) {
-      // schedule is optional
+      if (!form.interview) e.interview = 'Select interview preference.'
       // Accept phone without the leading 0 (user types starting with 1) -> 10 digits
       if (!/^1\d{9}$/.test(form.phone)) e.phone = 'Enter 10 digits starting with 1 (e.g. 1012345678).'
     }
@@ -150,23 +150,25 @@ function App() {
     setSubmitting(true)
     
     try {
-      // Prepare form data for API - just send the filename
+      // Prepare form data for API
       const formData = {
         university_id: form.studentId,
         full_name: form.name,
         email: form.email,
         faculty: form.faculty,
         year: parseInt(form.year),
-  phone_number: `+20${form.phone}`,
+        phone_number: `+20${form.phone}`,
         first_choice: getDepartmentIdByName(form.dept1),
         second_choice: getDepartmentIdByName(form.dept2),
         skills: form.skills,
         motivation: form.motivation,
-        schedule: form.schedule ? form.schedule.name : 'no-schedule.pdf'
+        interview: form.interview
       };
 
       // Submit application to backend
       console.log('Submitting payload to API:', formData);
+      console.log('Interview value:', form.interview);
+      console.log('Form state:', form);
       const result = await ApiService.submitApplication(formData);
 
       console.log('Application submitted successfully:', result);
@@ -181,7 +183,6 @@ function App() {
     }
   }
 
-  const scheduleName = useMemo(() => (form.schedule ? form.schedule.name : 'No file chosen'), [form.schedule])
 
   return (
     <div className="page" style={{ background: `linear-gradient(135deg, ${palette.navy900}, ${palette.navy700})` }}>
@@ -258,29 +259,17 @@ function App() {
 
           {step === 2 && (
             <section className="step animate-in">
-              <h2 className="card-title">Documents & Contact</h2>
-              <p className="card-sub">Upload schedule and phone</p>
+              <h2 className="card-title">Interview & Contact</h2>
+              <p className="card-sub">Interview preference and phone</p>
               <div className="grid">
                 <label>
-                  <span>Schedule (PDF)</span>
-                  <input
-                    className="pill"
-                    type="file"
-                    accept="application/pdf"
-                    onChange={e => {
-                      const file = e.target.files[0] || null;
-                      if (file && file.type !== 'application/pdf') {
-                        updateField('schedule', null);
-                        e.target.value = '';
-                        setErrors(prev => ({ ...prev, schedule: 'Only PDF files are allowed.' }));
-                      } else {
-                        updateField('schedule', file);
-                        setErrors(prev => ({ ...prev, schedule: undefined }));
-                      }
-                    }}
-                  />
-                  <small className="file-name">{scheduleName}</small>
-                  {errors.schedule && <small className="error">{errors.schedule}</small>}
+                  <span>Interview Preference</span>
+                  <select className="pill" value={form.interview} onChange={e => updateField('interview', e.target.value)}>
+                    <option value="">Select interview preference</option>
+                    <option value="on-campus">On-campus</option>
+                    <option value="online">Online</option>
+                  </select>
+                  {errors.interview && <small className="error">{errors.interview}</small>}
                 </label>
                 <label>
                   <span>Phone / WhatsApp</span>
@@ -377,7 +366,7 @@ function App() {
                   <li><b>ID:</b> <span>{form.studentId}</span></li>
                   <li><b>Faculty/Year:</b> <span>{form.faculty} — {years.find(y => y.value == form.year)?.label || form.year}</span></li>
                   <li><b>Phone:</b> <span>{form.phone ? `+20${form.phone}` : '-'}</span></li>
-                  <li><b>Schedule:</b> <span>{scheduleName}</span></li>
+                  <li><b>Interview:</b> <span>{form.interview || '-'}</span></li>
                   <li><b>Departments:</b> <span>{form.dept1}{form.dept2 ? `, ${form.dept2}` : ''}</span></li>
                   <li><b>Skills:</b> <span>{form.skills ? form.skills : '-'}</span></li>
                   <li><b>Motivation:</b> <span>{form.motivation ? form.motivation : '-'}</span></li>

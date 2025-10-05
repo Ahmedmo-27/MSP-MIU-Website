@@ -5,6 +5,9 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
 class ApiService {
   static async submitApplication(formData) {
     try {
+      console.log('API Service - Sending data:', formData);
+      console.log('API Service - JSON stringified:', JSON.stringify(formData));
+      
       const response = await fetch(`${API_BASE_URL}/applications`, {
         method: 'POST',
         headers: {
@@ -13,7 +16,9 @@ class ApiService {
         body: JSON.stringify(formData),
       });
 
+      console.log('API Service - Response status:', response.status);
       const result = await response.json();
+      console.log('API Service - Response data:', result);
       
       if (!response.ok) {
         throw new Error(result.error || 'Failed to submit application');
@@ -26,25 +31,6 @@ class ApiService {
     }
   }
 
-  static async submitApplicationWithFile(formData) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/applications`, {
-        method: 'POST',
-        body: formData, // FormData will be sent as multipart/form-data
-      });
-
-      const result = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to submit application');
-      }
-
-      return result;
-    } catch (error) {
-      console.error('Error submitting application:', error);
-      throw error;
-    }
-  }
 
   static async getAllApplications() {
     try {

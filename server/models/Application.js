@@ -79,6 +79,13 @@ const Application = sequelize.define('Application', {
       notEmpty: true
     }
   },
+  interview: {
+    type: DataTypes.ENUM('on-campus', 'online'),
+    allowNull: false,
+    validate: {
+      notEmpty: true
+    }
+  },
   status: {
     type: DataTypes.ENUM('pending', 'approved', 'rejected'),
     defaultValue: 'pending'

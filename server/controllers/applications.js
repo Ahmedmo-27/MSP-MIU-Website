@@ -14,12 +14,12 @@ const createApplication = async (req, res) => {
             second_choice,
             skills,
             motivation,
-            schedule
+            interview
         } = req.body;
 
         // Validation
         if (!university_id || !full_name || !email || !faculty || !year || !phone_number || 
-            !first_choice || !skills || !motivation) {
+            !first_choice || !skills || !motivation || !interview) {
             return res.status(400).json({ 
                 success: false,
                 error: 'All required fields must be provided' 
@@ -47,9 +47,10 @@ const createApplication = async (req, res) => {
             year,
             phone_number,
             first_choice,
-            second_choice: second_choice || null,
+            second_choice: second_choice || undefined, // Use undefined instead of null
             skills,
-            motivation
+            motivation,
+            interview
         });
 
         res.status(201).json({
@@ -67,7 +68,10 @@ const createApplication = async (req, res) => {
         console.error('Error details:', {
             message: error.message,
             stack: error.stack,
-            name: error.name
+            name: error.name,
+            code: error.code,
+            errno: error.errno,
+            sqlState: error.sqlState
         });
         res.status(500).json({
             success: false,
