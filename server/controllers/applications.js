@@ -47,7 +47,7 @@ const createApplication = async (req, res) => {
             year,
             phone_number,
             first_choice,
-            second_choice: second_choice || undefined, // Use undefined instead of null
+            second_choice: second_choice || null, // Allow null for second_choice
             skills,
             motivation,
             interview
