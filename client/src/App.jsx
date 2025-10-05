@@ -102,8 +102,8 @@ function App() {
   function validateCurrentStep() {
     const e = {}
     if (step === 0) {
-      // Name: accept 2 or 3 words
-      if (!/^\s*\S+(?:\s+\S+){1,2}\s*$/.test(form.name)) e.name = 'Enter 2 or 3 names.'
+      // Name: require at least 2 words (no maximum)
+      if (!/^\s*\S+(?:\s+\S+){1,}\s*$/.test(form.name)) e.name = 'Enter at least 2 words.'
       // email pattern: letters then digits (e.g. name2398765) followed by @miuegypt.edu.eg
       if (!/^[A-Za-z]+\d+@miuegypt\.edu\.eg$/.test(form.email)) e.email = 'Format: name2398765@miuegypt.edu.eg'
       // student ID pattern: 4 digits / 5 digits (e.g. 2023/37654)
@@ -210,7 +210,7 @@ function App() {
               <div className="grid">
                 <label>
                   <span>Name</span>
-                  <input className="pill" value={form.name} onChange={e => updateField('name', e.target.value)} placeholder="Enter your full name" />
+                  <input className="pill" value={form.name} onChange={e => updateField('name', e.target.value)} placeholder="Enter your name" />
                   {errors.name && <small className="error">{errors.name}</small>}
                 </label>
                 <label>
@@ -403,38 +403,40 @@ function App() {
       )}
 
       {screen === 'success' && (
-        <main className="container welcome">
-          <h1 className="welcome-title">Submitted successfully</h1>
-          <img src={mspLogo} alt="MSP Club" className="welcome-logo" />
-          <p className="welcome-sub">We received your application. We will contact you soon.</p>
-          <div style={{ marginTop: 16, textAlign: 'center' }}>
-            <p style={{ marginBottom: 8 }}>Follow us</p>
-            <div style={{ display: 'flex', gap: 16, justifyContent: 'center', alignItems: 'center' }}>
-              <a
-                href="https://www.facebook.com/MSPClubMIU"
-                target="_blank"
-                rel="noreferrer"
-                aria-label="MSP Club on Facebook"
-                style={{ color: '#1877F2', textDecoration: 'none', display: 'inline-flex', gap: 8, alignItems: 'center' }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <path d="M22 12.07C22 6.49 17.52 2 11.94 2S2 6.49 2 12.07c0 4.99 3.66 9.13 8.44 9.93v-7.03H8.08v-2.9h2.36V9.41c0-2.33 1.38-3.62 3.5-3.62.  1.02 0 2.09.18 2.09.18v2.3h-1.17c-1.15 0-1.51.72-1.51 1.46v1.75h2.57l-.41 2.9h-2.16v7.03C18.34 21.2 22 17.06 22 12.07z" />
-                </svg>
-                <span style={{ fontSize: 14 }}>Facebook</span>
-              </a>
+        <main className="container welcome" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', paddingTop: 40 }}>
+          <div style={{ textAlign: 'center' }}>
+            <img src={mspLogo} alt="MSP Club" className="welcome-logo" style={{ width: 160, height: 'auto', marginBottom: 20 }} />
+            <h1 className="welcome-title">Submitted successfully</h1>
+            <p className="welcome-sub">We received your application. We will contact you soon.</p>
+            <div style={{ marginTop: 16, textAlign: 'center' }}>
+              <p style={{ marginBottom: 8 }}>Follow us</p>
+              <div style={{ display: 'flex', gap: 16, justifyContent: 'center', alignItems: 'center' }}>
+                <a
+                  href="https://www.tiktok.com/@mspmiu"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="MSP Club on TikTok"
+                  style={{ color: '#000', textDecoration: 'none', display: 'inline-flex', gap: 8, alignItems: 'center' }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M16.5 3.5c-.1 0-.2 0-.3.1-1.4.9-2.8 1.2-4.1 1.2v6.2c0 1.8-.7 3.4-2 4.6-1.1 1-2.6 1.6-4.2 1.6-3.3 0-6-2.7-6-6s2.7-6 6-6c.3 0 .6 0 .9.1v2.1c-.3-.1-.6-.1-.9-.1-2.2 0-4 1.8-4 4s1.8 4 4 4c1.1 0 2.1-.4 2.9-1.1 1-1 1.6-2.5 1.6-4.1V4.7c1.6 0 3.1-.4 4.6-1.3.1 0 .2-.1.2-.2.1-.1 0-.2-.1-.2z" />
+                  </svg>
+                  <span style={{ fontSize: 14 }}>TikTok</span>
+                </a>
 
-              <a
-                href="https://www.instagram.com/mspmiu/"
-                target="_blank"
-                rel="noreferrer"
-                aria-label="MSP Club on Instagram"
-                style={{ color: '#E1306C', textDecoration: 'none', display: 'inline-flex', gap: 8, alignItems: 'center' }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <path d="M7 2C4.24 2 2 4.24 2 7v10c0 2.76 2.24 5 5 5h10c2.76 0 5-2.24 5-5V7c0-2.76-2.24-5-5-5H7zm10 2c1.66 0 3 1.34 3 3v10c0 1.66-1.34 3-3 3H7c-1.66 0-3-1.34-3-3V7c0-1.66 1.34-3 3-3h10zM12 7a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6zM17.5 6.5a1.25 1.25 0 11-2.5 0 1.25 1.25 0 012.5 0z" />
-                </svg>
-                <span style={{ fontSize: 14 }}>Instagram</span>
-              </a>
+                <a
+                  href="https://www.instagram.com/mspmiu"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="MSP Club on Instagram"
+                  style={{ color: '#E1306C', textDecoration: 'none', display: 'inline-flex', gap: 8, alignItems: 'center' }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M7 2C4.24 2 2 4.24 2 7v10c0 2.76 2.24 5 5 5h10c2.76 0 5-2.24 5-5V7c0-2.76-2.24-5-5-5H7zm10 2c1.66 0 3 1.34 3 3v10c0 1.66-1.34 3-3 3H7c-1.66 0-3-1.34-3-3V7c0-1.66 1.34-3 3-3h10zM12 7a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6zM17.5 6.5a1.25 1.25 0 11-2.5 0 1.25 1.25 0 012.5 0z" />
+                  </svg>
+                  <span style={{ fontSize: 14 }}>Instagram</span>
+                </a>
+              </div>
             </div>
           </div>
         </main>
