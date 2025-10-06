@@ -1,37 +1,45 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import ApiService from "../services/api";
 
 const Dashboard = () => {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get("http://localhost:3000/api/applications") // adjust backend port if needed
-      .then(res => {
-        // Ensure status has default "pending"
-        const apps = res.data.data.map(app => ({
-          ...app,
-          status: app.status || "pending"
-        }));
-        setApplications(apps);
+    const fetchApplications = async () => {
+      try {
+        const result = await ApiService.getAllApplications();
+        setApplications(result.data);
         setLoading(false);
-      })
-      .catch(err => {
+      } catch (err) {
         console.error("Error fetching applications:", err);
         setLoading(false);
-      });
+      }
+    };
+
+    fetchApplications();
   }, []);
 
-  const handleStatusChange = (id, newStatus) => {
+  const handleStatusChange = async (application_id, newStatus) => {
+    // Store original status for potential rollback
+    const originalStatus = applications.find(app => app.application_id === application_id)?.status;
+    
     // Update locally for instant feedback
     setApplications(prev =>
-      prev.map(app => (app.id === id ? { ...app, status: newStatus } : app))
+      prev.map(app => (app.application_id === application_id ? { ...app, status: newStatus } : app))
     );
 
     // Call backend to persist change
-    axios.put("http://localhost:3000/api/applications/${id}/status", { status: newStatus })
-      .then(res => console.log("Status updated:", res.data))
-      .catch(err => console.error("Error updating status:", err));
+    try {
+      const result = await ApiService.updateApplicationStatus(application_id, newStatus);
+      console.log("Status updated:", result);
+    } catch (err) {
+      console.error("Error updating status:", err);
+      // Revert the local change on error
+      setApplications(prev =>
+        prev.map(app => (app.application_id === application_id ? { ...app, status: originalStatus } : app))
+      );
+    }
   };
 
   if (loading) return <p>Loading applications...</p>;
@@ -51,7 +59,7 @@ const Dashboard = () => {
         </thead>
         <tbody>
           {applications.map(app => (
-            <tr key={app.id}>
+            <tr key={app.application_id}>
               <td>{app.university_id}</td>
               <td>{app.full_name}</td>
               <td>{app.faculty}</td>
@@ -59,11 +67,11 @@ const Dashboard = () => {
               <td>
                 <select
                   value={app.status}
-                  onChange={e => handleStatusChange(app.id, e.target.value)}
+                  onChange={e => handleStatusChange(app.application_id, e.target.value)}
                 >
                   <option value="pending">Pending</option>
-                  <option value="accepted">Accepted</option>
-                  <option value="denied">Denied</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
                 </select>
               </td>
             </tr>
