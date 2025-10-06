@@ -8,6 +8,144 @@ const Dashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredApplications, setFilteredApplications] = useState([]);
 
+  // Chart colors - more distinguished and vibrant
+  const chartColors = [
+    '#395a7f', '#e74c3c', '#27ae60', '#f39c12', '#9b59b6', '#1abc9c',
+    '#34495e', '#e67e22', '#3498db', '#2ecc71', '#8e44ad', '#f1c40f',
+    '#e91e63', '#00bcd4', '#4caf50', '#ff9800', '#795548', '#607d8b'
+  ];
+
+  // Process data for charts
+  const getChartData = (applications, field, fieldName = 'Unknown') => {
+    const counts = {};
+    applications.forEach(app => {
+      let value = app[field];
+      if (field === 'first_choice' || field === 'second_choice') {
+        if (value) {
+          value = getDepartmentNameById(value);
+        }
+      }
+      if (!value || value === null || value === undefined) value = 'N/A';
+      counts[value] = (counts[value] || 0) + 1;
+    });
+    
+    return Object.entries(counts)
+      .map(([label, count], index) => ({
+        label,
+        count,
+        percentage: Math.round((count / applications.length) * 100),
+        color: chartColors[index % chartColors.length]
+      }))
+      .sort((a, b) => b.count - a.count); // Sort by count (highest to lowest)
+  };
+
+  const firstChoiceData = getChartData(applications, 'first_choice');
+  const secondChoiceData = getChartData(applications, 'second_choice');
+  const facultyData = getChartData(applications, 'faculty');
+
+  // Simple Pie Chart Component
+  const PieChart = ({ data, title, size = 200 }) => {
+    if (!data || data.length === 0) return <div style={{ 
+      textAlign: 'center', 
+      margin: '20px',
+      fontFamily: 'Arial, sans-serif',
+      color: '#666'
+    }}>No data available</div>;
+
+    let cumulativePercentage = 0;
+    
+    return (
+      <div style={{ 
+        textAlign: 'center', 
+        margin: '20px',
+        fontFamily: 'Arial, sans-serif'
+      }}>
+        <h3 style={{ 
+          marginBottom: '15px', 
+          color: '#395a7f',
+          fontSize: '16px',
+          fontWeight: '600',
+          fontFamily: 'Arial, sans-serif'
+        }}>{title}</h3>
+        
+        <div style={{ position: 'relative', display: 'inline-block', width: size, height: size }}>
+          <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+            {data.map((item, index) => {
+              const circumference = 2 * Math.PI * (size / 2 - 10);
+              const strokeDasharray = `${(item.percentage / 100) * circumference} ${circumference}`;
+              const strokeDashoffset = -(cumulativePercentage / 100) * circumference;
+              
+              cumulativePercentage += item.percentage;
+              
+              return (
+                <circle
+                  key={index}
+                  cx={size / 2}
+                  cy={size / 2}
+                  r={size / 2 - 10}
+                  fill="none"
+                  stroke={item.color}
+                  strokeWidth="18"
+                  strokeDasharray={strokeDasharray}
+                  strokeDashoffset={strokeDashoffset}
+                  style={{ 
+                    transition: 'all 0.3s ease',
+                    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
+                  }}
+                />
+              );
+            })}
+          </svg>
+          
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            fontSize: '18px',
+            fontWeight: '700',
+            color: '#395a7f',
+            fontFamily: 'Arial, sans-serif'
+          }}>
+            {data.reduce((sum, item) => sum + item.count, 0)}
+          </div>
+        </div>
+        
+        <div style={{ 
+          marginTop: '15px', 
+          textAlign: 'left',
+          maxWidth: '250px'
+        }}>
+          {data.map((item, index) => (
+            <div key={index} style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              margin: '8px 0',
+              padding: '4px 0'
+            }}>
+              <div style={{
+                width: '14px',
+                height: '14px',
+                backgroundColor: item.color,
+                borderRadius: '3px',
+                marginRight: '10px',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
+              }}></div>
+              <span style={{ 
+                fontSize: '13px',
+                fontFamily: 'Arial, sans-serif',
+                color: '#333',
+                fontWeight: '500'
+              }}>
+                {item.label}: {item.count} ({item.percentage}%)
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   useEffect(() => {
     const fetchApplications = async () => {
       try {
@@ -89,6 +227,34 @@ const Dashboard = () => {
     <div style={{ padding: "20px" }}>
       <h2>Applications Dashboard</h2>
       
+      {/* Charts Section */}
+      <div style={{ 
+        display: 'flex', 
+        flexWrap: 'wrap', 
+        justifyContent: 'space-around', 
+        marginBottom: '30px',
+        padding: '20px',
+        backgroundColor: '#f8f9fa',
+        borderRadius: '8px',
+        border: '1px solid #e9ecef'
+      }}>
+        <PieChart 
+          data={firstChoiceData} 
+          title="First Choice Departments" 
+          size={180}
+        />
+        <PieChart 
+          data={secondChoiceData} 
+          title="Second Choice Departments" 
+          size={180}
+        />
+        <PieChart 
+          data={facultyData} 
+          title="Faculties Distribution" 
+          size={180}
+        />
+      </div>
+      
       {/* Search Input */}
       <div style={{ marginBottom: "20px" }}>
         <input
@@ -124,7 +290,7 @@ const Dashboard = () => {
               <th style={{ padding: "10px", textAlign: "left" }}>First Choice</th>
               <th style={{ padding: "10px", textAlign: "left" }}>Second Choice</th>
               <th style={{ padding: "10px", textAlign: "left" }}>Skills</th>
-              <th style={{ padding: "10px", textAlign: "left" }}>Motivation</th>
+              <th style={{ padding: "10px", textAlign: "left" }}>Why Join MSP?</th>
               <th style={{ padding: "10px", textAlign: "left" }}>Interview</th>
               <th style={{ padding: "10px", textAlign: "left" }}>Status</th>
             </tr>
@@ -134,10 +300,38 @@ const Dashboard = () => {
               <tr key={app.application_id} style={{ borderBottom: "1px solid #ddd" }}>
                 <td style={{ padding: "8px" }}>{app.university_id}</td>
                 <td style={{ padding: "8px" }}>{app.full_name}</td>
-                <td style={{ padding: "8px" }}>{app.email}</td>
+                <td style={{ padding: "8px" }}>
+                  <a 
+                    href={`mailto:${app.email}`}
+                    style={{ 
+                      color: 'inherit', 
+                      textDecoration: 'none',
+                      fontWeight: '500'
+                    }}
+                    onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
+                    onMouseOut={(e) => e.target.style.textDecoration = 'none'}
+                  >
+                    {app.email}
+                  </a>
+                </td>
                 <td style={{ padding: "8px" }}>{app.faculty}</td>
                 <td style={{ padding: "8px" }}>{app.year}</td>
-                <td style={{ padding: "8px" }}>{app.phone_number}</td>
+                <td style={{ padding: "8px" }}>
+                  <a 
+                    href={`https://wa.me/${app.phone_number.replace(/[^0-9]/g, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ 
+                      color: 'inherit', 
+                      textDecoration: 'none',
+                      fontWeight: '500'
+                    }}
+                    onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
+                    onMouseOut={(e) => e.target.style.textDecoration = 'none'}
+                  >
+                    {app.phone_number}
+                  </a>
+                </td>
                 <td style={{ padding: "8px" }}>{getDepartmentNameById(app.first_choice)}</td>
                 <td style={{ padding: "8px" }}>
                   {app.second_choice ? getDepartmentNameById(app.second_choice) : "N/A"}
