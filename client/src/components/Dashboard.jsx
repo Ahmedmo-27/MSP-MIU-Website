@@ -7,6 +7,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredApplications, setFilteredApplications] = useState([]);
+  const [expandedText, setExpandedText] = useState({ field: null, appId: null });
 
   // Chart colors - more distinguished and vibrant
   const chartColors = [
@@ -42,6 +43,84 @@ const Dashboard = () => {
   const firstChoiceData = getChartData(applications, 'first_choice');
   const secondChoiceData = getChartData(applications, 'second_choice');
   const facultyData = getChartData(applications, 'faculty');
+
+  // Function to handle text expansion
+  const handleTextClick = (field, appId, text) => {
+    if (text && text.length > 100) {
+      setExpandedText({ field, appId, text });
+    }
+  };
+
+  // Function to close expanded text
+  const closeExpandedText = () => {
+    setExpandedText({ field: null, appId: null });
+  };
+
+  // Text Modal Component
+  const TextModal = () => {
+    if (!expandedText.field) return null;
+
+    const fieldTitle = expandedText.field === 'skills' ? 'Skills' : 'Why Join MSP?';
+    
+    return (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+        padding: '20px'
+      }}>
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '8px',
+          padding: '30px',
+          maxWidth: '600px',
+          maxHeight: '80vh',
+          overflow: 'auto',
+          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
+          position: 'relative'
+        }}>
+          <button
+            onClick={closeExpandedText}
+            style={{
+              position: 'absolute',
+              top: '10px',
+              right: '15px',
+              background: 'none',
+              border: 'none',
+              fontSize: '24px',
+              cursor: 'pointer',
+              color: '#666'
+            }}
+          >
+            ×
+          </button>
+          <h3 style={{
+            margin: '0 0 20px 0',
+            color: '#395a7f',
+            fontSize: '18px',
+            fontWeight: '600'
+          }}>
+            {fieldTitle}
+          </h3>
+          <div style={{
+            whiteSpace: 'pre-wrap',
+            lineHeight: '1.6',
+            color: '#333',
+            fontSize: '14px'
+          }}>
+            {expandedText.text}
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   // Simple Pie Chart Component
   const PieChart = ({ data, title, size = 200 }) => {
@@ -225,6 +304,7 @@ const Dashboard = () => {
 
   return (
     <div style={{ padding: "20px" }}>
+      <TextModal />
       <h2>Applications Dashboard</h2>
       
       {/* Charts Section */}
@@ -337,10 +417,30 @@ const Dashboard = () => {
                   {app.second_choice ? getDepartmentNameById(app.second_choice) : "N/A"}
                 </td>
                 <td style={{ padding: "8px", maxWidth: "200px", wordWrap: "break-word" }}>
-                  {app.skills.length > 100 ? `${app.skills.substring(0, 100)}...` : app.skills}
+                  <span
+                    onClick={() => handleTextClick('skills', app.application_id, app.skills)}
+                    style={{
+                      cursor: app.skills.length > 100 ? 'pointer' : 'default',
+                      color: 'inherit',
+                      textDecoration: app.skills.length > 100 ? 'underline' : 'none'
+                    }}
+                    title={app.skills.length > 100 ? 'Click to view full text' : ''}
+                  >
+                    {app.skills.length > 100 ? `${app.skills.substring(0, 100)}...` : app.skills}
+                  </span>
                 </td>
                 <td style={{ padding: "8px", maxWidth: "200px", wordWrap: "break-word" }}>
-                  {app.motivation.length > 100 ? `${app.motivation.substring(0, 100)}...` : app.motivation}
+                  <span
+                    onClick={() => handleTextClick('motivation', app.application_id, app.motivation)}
+                    style={{
+                      cursor: app.motivation.length > 100 ? 'pointer' : 'default',
+                      color: 'inherit',
+                      textDecoration: app.motivation.length > 100 ? 'underline' : 'none'
+                    }}
+                    title={app.motivation.length > 100 ? 'Click to view full text' : ''}
+                  >
+                    {app.motivation.length > 100 ? `${app.motivation.substring(0, 100)}...` : app.motivation}
+                  </span>
                 </td>
                 <td style={{ padding: "8px" }}>{app.interview}</td>
                 <td style={{ padding: "8px" }}>
