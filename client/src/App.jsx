@@ -1,6 +1,8 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import miuLogo from './assets/Images/miu-logo.png'
 import mspLogo from './assets/Images/msp-logo.png'
+import ApiService from './services/api'
+import { departments, getDepartmentIdByName } from './data/departments'
 
 const palette = {
   orange: '#F4581F',
@@ -28,16 +30,16 @@ const faculties = [
   'Alsun',
 ]
 
-const years = ['Freshman', 'Sophomore', 'Junior', 'Senior', 'Senior 2']
-
-const departments = [
-  'Media & Content Creation',
-  'Public Relations (PR)',
-  'Human Resources (HR)',
-  'Software Development',
-  'Technical Training Department',
-  'Event Planning',
+// Year mapping to integers (matches database schema)
+const years = [
+  { value: 1, label: 'Freshman' },
+  { value: 2, label: 'Sophomore' },
+  { value: 3, label: 'Junior' },
+  { value: 4, label: 'Senior' },
+  { value: 5, label: 'Senior 2' }
 ]
+
+// Departments are now imported from data/departments.js
 
 function Stepper({ step }) {
   const items = [0,1,2,3,4]
@@ -68,7 +70,7 @@ function App() {
     studentId: '',
     faculty: '',
     year: '',
-    schedule: null,
+    interview: '',
     phone: '',
     dept1: '',
     dept2: '',
@@ -85,31 +87,50 @@ function App() {
     setForm(prev => ({ ...prev, [key]: value }))
   }
 
+  // When faculty changes, if current departments are not allowed for the selected faculty, clear them
+  useEffect(() => {
+    // Only show Software and Technical for Computer Science and ECE
+    const allowTech = form.faculty === 'Computer Science' || form.faculty === 'Engineering Sciences & Arts - ECE'
+    if (!allowTech) {
+      const blocked = ['Software Development', 'Technical Training']
+      if (blocked.includes(form.dept1) || blocked.includes(form.dept2)) {
+        setForm(prev => ({ ...prev, dept1: blocked.includes(prev.dept1) ? '' : prev.dept1, dept2: blocked.includes(prev.dept2) ? '' : prev.dept2 }))
+      }
+    }
+  }, [form.faculty])
+
   function validateCurrentStep() {
     const e = {}
     if (step === 0) {
-      if (!/^\s*\S+\s+\S+\s+\S+\s*$/.test(form.name)) e.name = 'Enter exactly three words.'
+      // Name: require at least 2 words (no maximum)
+      if (!/^\s*\S+(?:\s+\S+){1,}\s*$/.test(form.name)) e.name = 'Enter at least 2 words.'
       // email pattern: letters then digits (e.g. name2398765) followed by @miuegypt.edu.eg
       if (!/^[A-Za-z]+\d+@miuegypt\.edu\.eg$/.test(form.email)) e.email = 'Format: name2398765@miuegypt.edu.eg'
       // student ID pattern: 4 digits / 5 digits (e.g. 2023/37654)
       if (!/^\d{4}\/\d{5}$/.test(form.studentId)) e.studentId = 'Format: xxxx/xxxxx (e.g. 2023/37654)'
     }
+
     if (step === 1) {
       if (!form.faculty) e.faculty = 'Select faculty.'
       if (!form.year) e.year = 'Select year.'
     }
+
     if (step === 2) {
-      if (!form.schedule) e.schedule = 'Upload schedule PDF.'
-      if (!/^\d{11}$/.test(form.phone)) e.phone = 'Enter exactly 11 digits (e.g. 01012345678).'
+      if (!form.interview) e.interview = 'Select interview preference.'
+      // Accept phone without the leading 0 (user types starting with 1) -> 10 digits
+      if (!/^1\d{9}$/.test(form.phone)) e.phone = 'Enter 10 digits starting with 1 (e.g. 1012345678).'
     }
+
     if (step === 3) {
+      // Only first department is required; second is optional
       if (!form.dept1) e.dept1 = 'Choose department.'
-      if (!form.dept2) e.dept2 = 'Choose department.'
     }
+
     if (step === 4) {
       if (!form.skills.trim()) e.skills = 'Tell us your skills.'
       if (!form.motivation.trim()) e.motivation = 'Share your motivation.'
     }
+
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -127,21 +148,54 @@ function App() {
     e.preventDefault()
     if (!validateCurrentStep()) return
     setSubmitting(true)
-    await new Promise(r => setTimeout(r, 1000))
-    setSubmitting(false)
-    setScreen('success')
+    
+    try {
+      // Prepare form data for API
+      const formData = {
+        university_id: form.studentId,
+        full_name: form.name,
+        email: form.email,
+        faculty: form.faculty,
+        year: parseInt(form.year),
+        phone_number: `+20${form.phone}`,
+        first_choice: getDepartmentIdByName(form.dept1),
+        second_choice: getDepartmentIdByName(form.dept2),
+        skills: form.skills,
+        motivation: form.motivation,
+        interview: form.interview
+      };
+
+      // Submit application to backend
+      console.log('Submitting payload to API:', formData);
+      console.log('Interview value:', form.interview);
+      console.log('Form state:', form);
+      const result = await ApiService.submitApplication(formData);
+
+      console.log('Application submitted successfully:', result);
+      setScreen('success')
+    } catch (error) {
+      console.error('Failed to submit application:', error);
+      // Show server-provided message where available
+      const msg = error.message || (error && error.error) || 'Failed to submit application. Please try again.';
+      alert(msg);
+    } finally {
+      setSubmitting(false)
+    }
   }
 
-  const scheduleName = useMemo(() => (form.schedule ? form.schedule.name : 'No file chosen'), [form.schedule])
 
   return (
     <div className="page" style={{ background: `linear-gradient(135deg, ${palette.navy900}, ${palette.navy700})` }}>
       {screen === 'welcome' && (
-        <main className="container welcome">
-          <h1 className="welcome-title">Welcome to MSP Club</h1>
-          <img src={mspLogo} alt="MSP Club" className="welcome-logo" />
-          <p className="welcome-sub">Join us and start your journey</p>
-          <button className="btn primary welcome-btn" onClick={() => setScreen('form')}>Apply</button>
+        <main className="container welcome" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ textAlign: 'center' }}>
+            <img src={mspLogo} alt="MSP Club" className="welcome-logo" style={{ width: 160, height: 'auto', marginBottom: 20 }} />
+            <h1 className="welcome-title">Welcome to MSP Club</h1>
+            <p className="welcome-sub">Join us and start your journey</p>
+            <div style={{ marginTop: 18 }}>
+              <button className="btn primary welcome-btn" onClick={() => setScreen('form')}>Apply</button>
+            </div>
+          </div>
         </main>
       )}
 
@@ -157,7 +211,7 @@ function App() {
               <div className="grid">
                 <label>
                   <span>Name</span>
-                  <input className="pill" value={form.name} onChange={e => updateField('name', e.target.value)} placeholder="Enter your full name" />
+                  <input className="pill" value={form.name} onChange={e => updateField('name', e.target.value)} placeholder="Enter your name" />
                   {errors.name && <small className="error">{errors.name}</small>}
                 </label>
                 <label>
@@ -194,7 +248,7 @@ function App() {
                   <select className="pill" value={form.year} onChange={e => updateField('year', e.target.value)}>
                     <option value="">Select year</option>
                     {years.map(y => (
-                      <option key={y} value={y}>{y}</option>
+                      <option key={y.value} value={y.value}>{y.label}</option>
                     ))}
                   </select>
                   {errors.year && <small className="error">{errors.year}</small>}
@@ -205,35 +259,33 @@ function App() {
 
           {step === 2 && (
             <section className="step animate-in">
-              <h2 className="card-title">Documents & Contact</h2>
-              <p className="card-sub">Upload schedule and phone</p>
+              <h2 className="card-title">Interview & Contact</h2>
+              <p className="card-sub">Interview preference and phone</p>
               <div className="grid">
                 <label>
-                  <span>Schedule (PDF)</span>
-                  <input
-                    className="pill"
-                    type="file"
-                    accept="application/pdf"
-                    onChange={e => {
-                      const file = e.target.files[0] || null;
-                      if (file && file.type !== 'application/pdf') {
-                        updateField('schedule', null);
-                        e.target.value = '';
-                        setErrors(prev => ({ ...prev, schedule: 'Only PDF files are allowed.' }));
-                      } else {
-                        updateField('schedule', file);
-                        setErrors(prev => ({ ...prev, schedule: undefined }));
-                      }
-                    }}
-                  />
-                  <small className="file-name">{scheduleName}</small>
-                  {errors.schedule && <small className="error">{errors.schedule}</small>}
+                  <span>Interview Preference</span>
+                  <select className="pill" value={form.interview} onChange={e => updateField('interview', e.target.value)}>
+                    <option value="">Select interview preference</option>
+                    <option value="on-campus">On-campus</option>
+                    <option value="online">Online</option>
+                  </select>
+                  {errors.interview && <small className="error">{errors.interview}</small>}
                 </label>
                 <label>
                   <span>Phone / WhatsApp</span>
                   <div className="prefix-wrap">
                     <span className="prefix" aria-hidden="true">+20</span>
-                    <input className="pill phone-input" inputMode="numeric" value={form.phone} onChange={e => updateField('phone', e.target.value.replace(/[^\d]/g, ''))} placeholder="01012345678" />
+                    <input
+                      className="pill phone-input"
+                      inputMode="numeric"
+                      value={form.phone}
+                      onChange={e => {
+                        // keep only digits, and remove any leading zeros so user can type starting with 1
+                        const cleaned = e.target.value.replace(/[^\d]/g, '').replace(/^0+/, '')
+                        updateField('phone', cleaned)
+                      }}
+                      placeholder="1012345678"
+                    />
                   </div>
                   {errors.phone && <small className="error">{errors.phone}</small>}
                 </label>
@@ -250,21 +302,35 @@ function App() {
                   <span>Department 1</span>
                   <select className="pill" value={form.dept1} onChange={e => updateField('dept1', e.target.value)}>
                     <option value="">Select department</option>
-                    {departments.map(d => (
-                      <option key={d} value={d}>{d}</option>
-                    ))}
+                    {departments
+                      .filter(d => {
+                        // hide software & technical unless faculty is CS or ECE
+                        if (d.name === 'Software Development' || d.name === 'Technical Training') {
+                          return form.faculty === 'Computer Science' || form.faculty === 'Engineering Sciences & Arts - ECE'
+                        }
+                        return true
+                      })
+                      .map(d => (
+                        <option key={d.id} value={d.name}>{d.name}</option>
+                      ))}
                   </select>
                   {errors.dept1 && <small className="error">{errors.dept1}</small>}
                 </label>
                 <label>
-                  <span>Department 2</span>
+                  <span>Department 2 <small style={{ fontWeight: 400, color: '#666' }}>(optional)</small></span>
                   <select className="pill" value={form.dept2} onChange={e => updateField('dept2', e.target.value)}>
-                    <option value="">Select department</option>
-                    {departments.map(d => (
-                      <option key={d} value={d}>{d}</option>
-                    ))}
+                    <option value="">Select department (optional)</option>
+                    {departments
+                      .filter(d => {
+                        if (d.name === 'Software Development' || d.name === 'Technical Training') {
+                          return form.faculty === 'Computer Science' || form.faculty === 'Engineering Sciences & Arts - ECE'
+                        }
+                        return true
+                      })
+                      .map(d => (
+                        <option key={d.id} value={d.name}>{d.name}</option>
+                      ))}
                   </select>
-                  {errors.dept2 && <small className="error">{errors.dept2}</small>}
                 </label>
               </div>
             </section>
@@ -298,10 +364,10 @@ function App() {
                   <li><b>Name:</b> <span>{form.name}</span></li>
                   <li><b>Email:</b> <span>{form.email}</span></li>
                   <li><b>ID:</b> <span>{form.studentId}</span></li>
-                  <li><b>Faculty/Year:</b> <span>{form.faculty} — {form.year}</span></li>
-                  <li><b>Phone:</b> <span>{form.phone}</span></li>
-                  <li><b>Schedule:</b> <span>{scheduleName}</span></li>
-                  <li><b>Departments:</b> <span>{form.dept1} , {form.dept2}</span></li>
+                  <li><b>Faculty/Year:</b> <span>{form.faculty} — {years.find(y => y.value == form.year)?.label || form.year}</span></li>
+                  <li><b>Phone:</b> <span>{form.phone ? `+20${form.phone}` : '-'}</span></li>
+                  <li><b>Interview:</b> <span>{form.interview || '-'}</span></li>
+                  <li><b>Departments:</b> <span>{form.dept1}{form.dept2 ? `, ${form.dept2}` : ''}</span></li>
                   <li><b>Skills:</b> <span>{form.skills ? form.skills : '-'}</span></li>
                   <li><b>Motivation:</b> <span>{form.motivation ? form.motivation : '-'}</span></li>
                 </ul>
@@ -326,10 +392,42 @@ function App() {
       )}
 
       {screen === 'success' && (
-        <main className="container welcome">
-          <h1 className="welcome-title">Submitted successfully</h1>
-          <img src={mspLogo} alt="MSP Club" className="welcome-logo" />
-          <p className="welcome-sub">We received your application. We will contact you soon.</p>
+        <main className="container welcome" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', paddingTop: 40 }}>
+          <div style={{ textAlign: 'center' }}>
+            <img src={mspLogo} alt="MSP Club" className="welcome-logo" style={{ width: 160, height: 'auto', marginBottom: 20 }} />
+            <h1 className="welcome-title">Submitted successfully</h1>
+            <p className="welcome-sub">We received your application. We will contact you soon.</p>
+            <div style={{ marginTop: 16, textAlign: 'center' }}>
+              <p style={{ marginBottom: 8 }}>Follow us</p>
+              <div style={{ display: 'flex', gap: 16, justifyContent: 'center', alignItems: 'center' }}>
+                <a
+                  href="https://www.tiktok.com/@mspmiu"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="MSP Club on TikTok"
+                  style={{ color: '#000', textDecoration: 'none', display: 'inline-flex', gap: 8, alignItems: 'center' }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M16.5 3.5c-.1 0-.2 0-.3.1-1.4.9-2.8 1.2-4.1 1.2v6.2c0 1.8-.7 3.4-2 4.6-1.1 1-2.6 1.6-4.2 1.6-3.3 0-6-2.7-6-6s2.7-6 6-6c.3 0 .6 0 .9.1v2.1c-.3-.1-.6-.1-.9-.1-2.2 0-4 1.8-4 4s1.8 4 4 4c1.1 0 2.1-.4 2.9-1.1 1-1 1.6-2.5 1.6-4.1V4.7c1.6 0 3.1-.4 4.6-1.3.1 0 .2-.1.2-.2.1-.1 0-.2-.1-.2z" />
+                  </svg>
+                  <span style={{ fontSize: 14 }}>TikTok</span>
+                </a>
+
+                <a
+                  href="https://www.instagram.com/mspmiu"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="MSP Club on Instagram"
+                  style={{ color: '#E1306C', textDecoration: 'none', display: 'inline-flex', gap: 8, alignItems: 'center' }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M7 2C4.24 2 2 4.24 2 7v10c0 2.76 2.24 5 5 5h10c2.76 0 5-2.24 5-5V7c0-2.76-2.24-5-5-5H7zm10 2c1.66 0 3 1.34 3 3v10c0 1.66-1.34 3-3 3H7c-1.66 0-3-1.34-3-3V7c0-1.66 1.34-3 3-3h10zM12 7a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6zM17.5 6.5a1.25 1.25 0 11-2.5 0 1.25 1.25 0 012.5 0z" />
+                  </svg>
+                  <span style={{ fontSize: 14 }}>Instagram</span>
+                </a>
+              </div>
+            </div>
+          </div>
         </main>
       )}
     </div>
@@ -337,5 +435,3 @@ function App() {
 }
 
 export default App
-
-

@@ -1,6 +1,6 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-
+import AppRouter from './AppRouter.jsx'
 import './assets/CSS/styles.css'
 import AppRouter from "./AppRouter.jsx";
 
