@@ -1,0 +1,423 @@
+# copilot-instructions.txt
+# PURPOSE: Canonical internal instructions for AI-generated code in this repository.
+# AUDIENCE: GitHub Copilot / automated coding agents only (NOT end users). Keep behavior consistent.
+# STYLE: Plain English, structured, deterministic. Each section defines enforceable rules.
+# SCOPE: Frontend (React), animations, styling, architecture, backend interaction patterns, quality.
+
+================================================================================
+SECTION: PROJECT OVERVIEW
+================================================================================
+Project Type: Modern, futuristic website for an MSP (Microsoft Tech Club) at MIU.
+Primary Stack: React (Vite) + Node.js/Express backend (existing server folder) + MongoDB.
+Frontend Paradigm: Functional React components ONLY. No class components, no legacy patterns.
+Styling Strategy: One dedicated .css file per component (co-located or in a parallel /styles directory). No inline styles, no styled-components, no CSS-in-JS.
+Animation Library: Framer Motion (preferred) for all non-trivial transitions, entrances, micro-interactions.
+Design Goals: Futuristic, accessible, performant, responsive, clean, minimal cognitive load.
+Code Philosophy: Clarity over cleverness; explicit over implicit; consistency over novelty.
+
+================================================================================
+SECTION: COLOR PALETTE (CANONICAL)
+================================================================================
+# Always import or reference these semantic mappings instead of hardcoding unrelated colors.
+# Use CSS variables in a global :root scope (ensure they exist) when not already defined.
+PALETTE_JS_OBJECT = {
+  orange: '#F4581F',
+  green: '#83BD00',
+  cyan: '#03A9F4',
+  yellow: '#FFC107',
+  gray: '#757575',
+  navy900: '#031C35',
+  navy800: '#0D3159',
+  navy700: '#1D4F82',
+  navy600: '#245C9E',
+  blue500: '#0077CC',
+  blue400: '#5AA0E6',
+  blue300: '#8EC2F0'
+}
+
+SEMANTIC_COLOR_USAGE = {
+  brandPrimary: 'blue500',
+  brandSecondary: 'cyan',
+  accentWarm: 'orange',
+  accentPositive: 'green',
+  accentInfo: 'blue400',
+  accentHighlight: 'yellow',
+  bgBase: 'navy900',
+  bgSurface: 'navy800',
+  bgSubtle: 'navy700',
+  borderSubtle: 'navy600',
+  textPrimary: '#FFFFFF',
+  textSecondary: 'blue300',
+  textMuted: 'gray'
+}
+
+RULES:
+1. Define CSS variables like: --color-brand-primary: #0077CC; etc. in a global stylesheet loaded once.
+2. Never introduce a new brand color without updating this section.
+3. Gradients: only combine adjacent palette hues (e.g., navy900 -> navy600, blue500 -> cyan).
+
+================================================================================
+SECTION: TYPOGRAPHY & SPACING
+================================================================================
+FONT_STACK_PRIMARY = "'Segoe UI', 'Inter', 'Roboto', system-ui, Arial, sans-serif"
+FONT_STACK_MONO = "'Ubuntu Mono', 'Fira Code', monospace"
+
+TEXT_SIZES = { xs: 0.75rem, sm: 0.875rem, base: 1rem, md: 1.125rem, lg: 1.25rem, xl: 1.5rem, xxl: 2rem }
+LINE_HEIGHT_BASE = 1.5
+
+SPACING_SCALE = { 0:0, 1:0.25rem, 2:0.5rem, 3:0.75rem, 4:1rem, 5:1.5rem, 6:2rem, 7:3rem }
+BORDER_RADIUS_SCALE = { sm:4px, md:8px, lg:16px, pill: 999px }
+
+RULES:
+1. Use rem units for sizing, percentages/flex for layout, avoid fixed px widths except for min tap targets.
+2. Vertical rhythm consistent: section padding typically 4–6 scale units.
+3. Headings: h1 used once per page (semantic). Do not skip heading levels in sequence.
+4. Avoid magic numbers—reference scale tokens.
+
+================================================================================
+SECTION: RESPONSIVE DESIGN
+================================================================================
+BREAKPOINTS = {
+  xs: 0,
+  sm: 480px,
+  md: 768px,
+  lg: 1024px,
+  xl: 1280px,
+  xxl: 1536px
+}
+
+RULES:
+1. Mobile-first: write base styles for smallest viewport, layer media queries ascending.
+2. Use CSS: @media (min-width: 768px) { ... } etc. Keep breakpoints centralized.
+3. Navigation collapses into a toggle at < md.
+4. Images must be responsive: max-width:100%; height:auto.
+5. Use flexbox or grid; avoid absolute positioning for general layout except purposeful overlays.
+
+================================================================================
+SECTION: FILE & DIRECTORY STRUCTURE (FRONTEND)
+================================================================================
+Preferred Structure (client/src):
+  assets/ (static media, images, fonts, global CSS utilities)
+  components/ (reusable presentational + small smart components)
+  layout/ (persistent layout shells: NavBar, Footer, SidePanel, etc.)
+  pages/ (route-level views only)
+  hooks/ (custom hooks)
+  context/ (React context providers)
+  services/ (API clients, data fetching logic)
+  data/ (static or seed data)
+  utils/ (pure helper functions)
+  animations/ (motion variants definitions) [optional]
+
+COMPONENT FILE RULES:
+1. Each component: ComponentName.jsx + ComponentName.css
+2. Index re-exports allowed for grouping: components/index.js (named exports only).
+3. No deep relative hell: prefer absolute imports via Vite alias (configure @ to src if not set).
+4. Avoid default exports for reusable components; prefer named exports for clarity.
+
+================================================================================
+SECTION: REACT COMPONENT STANDARDS
+================================================================================
+GENERAL RULES:
+1. Functional components only. Use arrow functions: export const ComponentName = () => { ... }
+2. Prop typing: If TypeScript is introduced later, migrate. For now, document complex prop shapes in JSDoc.
+3. Do not keep unrelated state in a component; lift state if consumed by siblings.
+4. Keep components under ~150 logical lines; extract subcomponents when larger.
+5. Use semantic HTML: <header>, <nav>, <main>, <section>, <article>, <aside>, <footer>, <figure>, <time>.
+6. Provide meaningful alt text for images; if decorative, use empty alt="".
+7. Accessibility: Ensure keyboard navigability (tab order, role=, aria-* when needed). Focus states visible.
+8. Avoid anonymous inline functions in large lists; extract handlers if performance-critical.
+9. Avoid premature memoization; add React.memo/useMemo/useCallback only after a real need.
+
+STATE MANAGEMENT:
+1. Local UI state: useState.
+2. Derived computed: useMemo (only when expensive or to maintain referential stability).
+3. Shared app-wide: React Context or lightweight external store (introduce only if necessary, default to Context + reducers).
+4. Async data: custom hooks wrapping fetch calls (e.g., useApplications()).
+
+HOOKS NAMING RULES:
+- Custom hooks: useThingName (camelCase after 'use').
+- Hooks must not be conditional; follow general Rules of Hooks.
+
+================================================================================
+SECTION: DATA FETCHING & SERVICES
+================================================================================
+1. All network calls centralize in /services/api.js or subdivided modules (e.g., services/applications.js) returning plain async functions.
+2. Handle errors with try/catch; return { data:null, error } shape or throw (be consistent per module).
+3. Never bury fetch logic inside components directly except trivial prototypes.
+4. Use environment variables (VITE_API_BASE_URL) for base URLs. Do not hardcode.
+5. Include simple request timeout (AbortController) for long calls where appropriate.
+
+API FUNCTION TEMPLATE (PSEUDO):
+export async function getApplications() {
+  const ctrl = new AbortController();
+  const id = setTimeout(() => ctrl.abort(), 10000);
+  try {
+    const res = await fetch(`${baseURL}/applications`, { signal: ctrl.signal });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+    return { data: json, error: null };
+  } catch (e) {
+    return { data: null, error: e };
+  } finally { clearTimeout(id); }
+}
+
+================================================================================
+SECTION: ERROR HANDLING & LOGGING
+================================================================================
+1. User-facing errors: friendly message + optional retry button.
+2. Developer logging: use console.error for unexpected failures (avoid leaving noisy console.log in committed code).
+3. Create a reusable <ErrorBoundary> for catastrophic render errors (React error boundary pattern).
+4. API errors propagate up through hooks; components decide how to present fallback UI.
+
+================================================================================
+SECTION: ANIMATIONS (FRAMER MOTION)
+================================================================================
+1. Import from 'framer-motion': { motion }.
+2. Encapsulate motion variants in a variants object constant outside component body for reuse.
+3. Use reduced-motion respect: if (prefers-reduced-motion) minimize motion intensity.
+4. Enter animations: subtle fade + upward 8–16px translate; durations 0.35–0.55s.
+5. Interactive hover: scale 1.02–1.05 max; avoid aggressive bounce.
+6. Stagger lists with parent variant containing staggerChildren.
+7. Store reusable variants in /animations/variants.js when shared.
+
+EXAMPLE VARIANTS SNIPPET:
+export const fadeSlideUp = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: 'easeOut' } }
+};
+
+================================================================================
+SECTION: CSS CONVENTIONS
+================================================================================
+1. Each component gets a dedicated .css file named ComponentName.css.
+2. Use BEM-like mild naming: .ComponentName__element--modifier for multi-part structures.
+3. Keep global resets/utilities in a single global stylesheet (e.g., styles.css) — do not pollute global scope.
+4. Prefer CSS variables for colors, spacing, radius, transitions.
+5. Transition standard: transition: all 0.25s ease; (or property-specific if performance-critical).
+6. Avoid !important unless overriding third-party styles.
+7. Use :root variables: --space-1, --color-brand-primary, etc.
+8. Dark theme base already inherent (navy backgrounds). Maintain sufficient contrast ratio (WCAG AA at least).
+
+================================================================================
+SECTION: ACCESSIBILITY (A11Y)
+================================================================================
+1. All interactive elements must be reachable via keyboard (tab index natural order).
+2. Use <button> not <div role="button"> unless unavoidable.
+3. Provide aria-live="polite" regions for async loading state changes if they affect page context.
+4. Color contrast: ensure text on dark backgrounds meets AA contrast (test orange/yellow usage carefully).
+5. Form inputs require associated <label for=> / id or <label><input/></label> wrapping.
+
+================================================================================
+SECTION: PERFORMANCE & OPTIMIZATION
+================================================================================
+1. Lazy-load route-level pages with React.lazy and Suspense if bundle size grows large.
+2. Defer non-critical animations until after first contentful paint (optional optimization). Avoid blocking rendering.
+3. Images: use modern formats (webp/avif) when adding new assets; supply width/height for layout stability.
+4. Avoid large JSON in bundle—fetch dynamically.
+5. Memoize expensive list item components with React.memo when profiling indicates re-render bottlenecks.
+
+================================================================================
+SECTION: SECURITY FRONTEND PRACTICES
+================================================================================
+1. Never expose secrets in source; rely on environment variables with VITE_ prefix.
+2. Sanitize or escape any dynamic HTML (avoid dangerouslySetInnerHTML unless sanitized upstream).
+3. Guard against open redirects and trust boundaries (frontend should not construct arbitrary redirect URLs from user input).
+4. Validate form inputs client-side before submission (basic constraints) + rely on server validation.
+
+================================================================================
+SECTION: GIT & COMMIT GUIDELINES
+================================================================================
+Commit Message Format:
+  <type>(scope): <concise summary>
+Types: feat, fix, chore, refactor, docs, style, test, perf, build.
+Examples:
+  feat(applications): add pagination to applications table
+  fix(auth): handle token refresh race condition
+
+Pull Requests:
+1. Include summary, screenshots for UI changes, mention accessibility impacts.
+2. Keep PRs small and focused where possible.
+
+================================================================================
+SECTION: NAMING RULES
+================================================================================
+Components: PascalCase (DashboardPanel.jsx)
+Hooks: useSomething (useApplications)
+CSS Classes: .ComponentName__element--modifier
+Files: match exported component/hook name.
+Constants: UPPER_SNAKE_CASE
+Utility functions: camelCase
+
+================================================================================
+SECTION: TESTING (FUTURE PREP)
+================================================================================
+1. When tests introduced: use Vitest + React Testing Library.
+2. Focus on critical interaction paths: forms, navigation, conditional rendering.
+3. Avoid snapshot over-reliance; prefer role-based queries (getByRole, getByLabelText).
+4. Provide mock service layer; do not hit live API in unit tests.
+
+================================================================================
+SECTION: ERROR / EMPTY / LOADING UI PATTERNS
+================================================================================
+Loading: skeleton or subtle shimmer (CSS animation) + aria-busy
+Empty State: icon + short guidance + primary action CTA
+Error State: concise message + Retry button calling refetch
+All states use consistent layout container (.StateContainer)
+
+================================================================================
+SECTION: CODE COMMENTING & DOCUMENTATION
+================================================================================
+1. Non-trivial functions: JSDoc summary + params + return.
+2. Document reasoning for complex decisions (why) rather than restating obvious what.
+3. Remove stale comments when code changes.
+
+================================================================================
+SECTION: LINTING & CONSISTENCY (ASSUMED)
+================================================================================
+1. If ESLint/Prettier not configured, prefer: semi: true, singleQuote: true, trailingComma: 'es5'.
+2. Consistent import ordering: external libs, absolute aliases, relative modules, styles last.
+3. No unused imports or variables—remove on creation.
+
+================================================================================
+SECTION: IMPLEMENTATION WORKFLOW (FOR AI)
+================================================================================
+1. Before adding feature: check existing structure to reuse components.
+2. Create or update service functions before UI if new data required.
+3. Create component skeleton + CSS file with placeholders.
+4. Implement logic + basic layout (semantic tags) + accessibility.
+5. Add animations (Framer Motion) last ensuring reduced motion fallback.
+6. Run local sanity tests / lint mentally; ensure no stray console logs (except errors/warnings).
+7. Use consistent color variables and spacing tokens.
+
+================================================================================
+SECTION: FRAMER MOTION USAGE TEMPLATE
+================================================================================
+import { motion } from 'framer-motion';
+
+const variants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } }
+};
+
+<motion.section
+  initial="hidden"
+  animate="visible"
+  variants={variants}
+  aria-labelledby="section-id"
+>
+  ...content...
+</motion.section>
+
+================================================================================
+SECTION: DO NOT DO / ANTI-PATTERNS
+================================================================================
+1. No class-based React components.
+2. No inline style objects except dynamic style edge cases (e.g., canvas sizing) — justify in comment.
+3. No CSS-in-JS libraries (styled-components, emotion) unless project direction changes.
+4. No large monolithic components exceeding 300 lines.
+5. No magic numbers for colors or spacing (always reference variables / tokens).
+6. No direct DOM manipulation (use refs or React patterns).
+7. No global mutable singletons for state (avoid window.* stores).
+8. No overly clever functional abstractions that reduce readability.
+
+================================================================================
+SECTION: ACCESSIBILITY QUICK CHECKLIST (PER FEATURE)
+================================================================================
+[ ] Proper heading hierarchy
+[ ] Labels for all form fields
+[ ] Keyboard focus order logical
+[ ] Focus visible on interactive elements
+[ ] Color contrast verified
+[ ] Motion respects prefers-reduced-motion
+[ ] Images have alt text
+[ ] Landmarks present (<header><main><footer>)
+
+================================================================================
+SECTION: FUTURE EXPANSION (PLACEHOLDERS)
+================================================================================
+1. Dark/Light toggle (if expanded): will adjust CSS variables; architecture should anticipate theming.
+2. Internationalization (i18n): if added, text content wrapped with translation function (t()).
+3. Offline readiness: potential future service worker integration.
+
+================================================================================
+SECTION: BACKEND COORDINATION ASSUMPTIONS
+================================================================================
+1. All API endpoints return JSON.
+2. Pagination format: { data: [...], page, pageSize, total } when applicable.
+3. Error responses: { error: { message, code } }.
+4. Authentication (if added): Bearer tokens via Authorization header; never store tokens in localStorage if sensitive—prefer httpOnly cookies (future adaptation).
+
+================================================================================
+SECTION: QUALITY GATES FOR NEW CODE (AI MUST SELF-CHECK)
+================================================================================
+Before finalizing a change, ensure:
+1. Folder/file naming consistency maintained.
+2. Component has matching CSS file if visual.
+3. Imports minimal and ordered; no unused symbols.
+4. Colors & spacing from tokens, not literals (except transitional dev experiments—remove before commit).
+5. Animation variants externalized if reused.
+6. Accessibility checklist passes.
+7. Error handling present for async logic.
+8. No extraneous console logs.
+9. Code is readable by a human maintainer unfamiliar with generation process.
+
+================================================================================
+SECTION: GENERATION BEHAVIOR (META RULES FOR COPILOT)
+================================================================================
+1. Do not invent APIs or endpoints; inspect existing /services and /server when uncertain.
+2. If ambiguity exists, choose simplest reasonable implementation and note assumption in comment.
+3. Provide small helper utilities rather than repeating logic across components.
+4. Prefer progressive enhancement; initial static + accessible, then layer motion.
+5. When refactoring, maintain backward compatibility unless instructed otherwise.
+6. Avoid adding dependencies without explicit instruction.
+7. Always output deterministic code blocks with stable naming.
+8. If a rule conflicts with explicit user instruction, follow user instruction and annotate the deviation.
+
+================================================================================
+SECTION: SAMPLE COMPONENT SKELETON (REFERENCE)
+================================================================================
+// File: components/ExampleCard.jsx
+import React from 'react';
+import { motion } from 'framer-motion';
+import './ExampleCard.css';
+
+const variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } }
+};
+
+export const ExampleCard = ({ title, description, onClick }) => {
+  return (
+    <motion.article
+      className="ExampleCard"
+      variants={variants}
+      initial="hidden"
+      animate="visible"
+      role="group"
+      tabIndex={0}
+      aria-label={title}
+      onClick={onClick}
+    >
+      <h3 className="ExampleCard__title">{title}</h3>
+      <p className="ExampleCard__desc">{description}</p>
+      <button className="ExampleCard__action" type="button">Learn More</button>
+    </motion.article>
+  );
+};
+
+/* File: components/ExampleCard.css */
+/* Variables assumed defined globally */
+.ExampleCard { background: var(--color-surface, #0D3159); color: #fff; padding: 1rem; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.4); transition: transform 0.25s ease, box-shadow 0.25s ease; }
+.ExampleCard:focus { outline: 2px solid var(--color-brand-primary); outline-offset: 4px; }
+.ExampleCard:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+.ExampleCard__title { margin: 0 0 0.5rem; font-size: 1.125rem; }
+.ExampleCard__desc { margin: 0 0 0.75rem; color: var(--color-text-secondary); }
+.ExampleCard__action { background: var(--color-brand-primary); color: #fff; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font: inherit; }
+.ExampleCard__action:hover { background: var(--color-brand-secondary, #03A9F4); }
+
+================================================================================
+SECTION: FINAL NOTE
+================================================================================
+These instructions persist unless explicitly superseded. Any generated code must align with the above. Deviations require inline commentary explaining rationale.
+
+# END OF FILE
