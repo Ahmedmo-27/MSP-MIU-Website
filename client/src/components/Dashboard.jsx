@@ -385,11 +385,11 @@ const Dashboard = () => {
                     href={`mailto:${app.email}`}
                     style={{ 
                       color: 'inherit', 
-                      textDecoration: 'none',
+                      textDecoration: 'underline',
                       fontWeight: '500'
                     }}
                     onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
-                    onMouseOut={(e) => e.target.style.textDecoration = 'none'}
+                    onMouseOut={(e) => e.target.style.textDecoration = 'underline'}
                   >
                     {app.email}
                   </a>
@@ -403,11 +403,11 @@ const Dashboard = () => {
                     rel="noopener noreferrer"
                     style={{ 
                       color: 'inherit', 
-                      textDecoration: 'none',
+                      textDecoration: 'underline',
                       fontWeight: '500'
                     }}
                     onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
-                    onMouseOut={(e) => e.target.style.textDecoration = 'none'}
+                    onMouseOut={(e) => e.target.style.textDecoration = 'underline'}
                   >
                     {app.phone_number}
                   </a>
