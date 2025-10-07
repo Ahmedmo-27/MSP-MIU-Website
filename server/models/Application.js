@@ -90,6 +90,10 @@ const Application = sequelize.define('Application', {
     type: DataTypes.ENUM('pending', 'approved', 'rejected'),
     defaultValue: 'pending'
   },
+  comment: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
   created_at: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW
