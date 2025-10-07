@@ -1,6 +1,126 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import ApiService from "../services/api";
 import { getDepartmentNameById } from "../data/departments";
+
+// Comment Modal Component - moved outside to prevent re-renders
+const CommentModal = ({ commentModal, setCommentModal, closeCommentModal, saveComment, textareaRef }) => {
+  if (!commentModal.isOpen) return null;
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000,
+      padding: '20px'
+    }}>
+      <div style={{
+        backgroundColor: 'white',
+        borderRadius: '8px',
+        padding: '30px',
+        maxWidth: '800px',
+        width: '90vw',
+        maxHeight: '80vh',
+        overflow: 'auto',
+        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
+        position: 'relative'
+      }}>
+        <button
+          onClick={closeCommentModal}
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '15px',
+            background: 'none',
+            border: 'none',
+            fontSize: '24px',
+            cursor: 'pointer',
+            color: '#666'
+          }}
+        >
+          ×
+        </button>
+        <h3 style={{
+          margin: '0 0 20px 0',
+          color: '#395a7f',
+          fontSize: '18px',
+          fontWeight: '600'
+        }}>
+          Interview Comment - {commentModal.application?.full_name}
+        </h3>
+        <textarea
+          ref={textareaRef}
+          value={commentModal.comment}
+          onChange={(e) => setCommentModal(prev => ({ ...prev, comment: e.target.value }))}
+          placeholder="Enter interview comment here..."
+          style={{
+            width: '100%',
+            minHeight: '200px',
+            padding: '12px',
+            border: '1px solid #ddd',
+            borderRadius: '4px',
+            fontSize: '14px',
+            color: '#395a7f',
+            fontFamily: 'Arial, sans-serif',
+            lineHeight: '1.5',
+            resize: 'vertical',
+            outline: 'none',
+            boxSizing: 'border-box'
+          }}
+          onFocus={(e) => e.target.style.borderColor = '#395a7f'}
+          onBlur={(e) => e.target.style.borderColor = '#ddd'}
+        />
+        <div style={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          gap: '10px',
+          marginTop: '20px'
+        }}>
+          <button
+            onClick={closeCommentModal}
+            style={{
+              padding: '10px 20px',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+              backgroundColor: '#f8f9fa',
+              color: '#666',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontFamily: 'Arial, sans-serif'
+            }}
+            onMouseOver={(e) => e.target.style.backgroundColor = '#e9ecef'}
+            onMouseOut={(e) => e.target.style.backgroundColor = '#f8f9fa'}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={saveComment}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              borderRadius: '4px',
+              backgroundColor: '#395a7f',
+              color: 'white',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontFamily: 'Arial, sans-serif'
+            }}
+            onMouseOver={(e) => e.target.style.backgroundColor = '#2c4a66'}
+            onMouseOut={(e) => e.target.style.backgroundColor = '#395a7f'}
+          >
+            Save Comment
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Dashboard = () => {
   const [applications, setApplications] = useState([]);
@@ -8,6 +128,8 @@ const Dashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredApplications, setFilteredApplications] = useState([]);
   const [expandedText, setExpandedText] = useState({ field: null, appId: null });
+  const [commentModal, setCommentModal] = useState({ isOpen: false, application: null, comment: '' });
+  const textareaRef = useRef(null);
 
   // Chart colors - more distinguished and vibrant
   const chartColors = [
@@ -54,6 +176,70 @@ const Dashboard = () => {
   // Function to close expanded text
   const closeExpandedText = () => {
     setExpandedText({ field: null, appId: null });
+  };
+
+  // Function to open comment modal
+  const openCommentModal = (application) => {
+    setCommentModal({
+      isOpen: true,
+      application: application,
+      comment: application.comment || ''
+    });
+  };
+
+  // Function to close comment modal
+  const closeCommentModal = () => {
+    setCommentModal({ isOpen: false, application: null, comment: '' });
+  };
+
+  // Focus textarea when modal opens
+  useEffect(() => {
+    if (commentModal.isOpen && textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  }, [commentModal.isOpen]);
+
+  // Function to get status color
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'approved':
+        return '#27ae60'; // Green color from the palette
+      case 'rejected':
+        return '#e74c3c'; // Red color from the palette
+      case 'pending':
+      default:
+        return '#395a7f'; // Default blue color from the palette
+    }
+  };
+
+  // Function to save comment
+  const saveComment = async () => {
+    try {
+      await ApiService.updateApplicationComment(commentModal.application.application_id, commentModal.comment);
+      
+      // Update local state
+      setApplications(prev =>
+        prev.map(app => 
+          app.application_id === commentModal.application.application_id 
+            ? { ...app, comment: commentModal.comment }
+            : app
+        )
+      );
+      
+      // Also update filtered applications to reflect the change immediately
+      setFilteredApplications(prev =>
+        prev.map(app => 
+          app.application_id === commentModal.application.application_id 
+            ? { ...app, comment: commentModal.comment }
+            : app
+        )
+      );
+      
+      closeCommentModal();
+    } catch (error) {
+      console.error('Error saving comment:', error);
+      alert('Failed to save comment. Please try again.');
+    }
   };
 
   // Text Modal Component
@@ -122,7 +308,8 @@ const Dashboard = () => {
     );
   };
 
-  // Simple Pie Chart Component
+
+  // Pie Chart Component
   const PieChart = ({ data, title, size = 200 }) => {
     if (!data || data.length === 0) return <div style={{ 
       textAlign: 'center', 
@@ -270,7 +457,8 @@ const Dashboard = () => {
         checkField(app.skills) ||
         checkField(app.motivation) ||
         checkField(app.interview) ||
-        checkField(app.status)
+        checkField(app.status) ||
+        checkField(app.comment)
       );
     });
     
@@ -286,6 +474,11 @@ const Dashboard = () => {
     setApplications(prev =>
       prev.map(app => (app.application_id === application_id ? { ...app, status: newStatus } : app))
     );
+    
+    // Also update filtered applications to reflect the change immediately
+    setFilteredApplications(prev =>
+      prev.map(app => (app.application_id === application_id ? { ...app, status: newStatus } : app))
+    );
 
     // Call backend to persist change
     try {
@@ -297,6 +490,10 @@ const Dashboard = () => {
       setApplications(prev =>
         prev.map(app => (app.application_id === application_id ? { ...app, status: originalStatus } : app))
       );
+      // Also revert filtered applications
+      setFilteredApplications(prev =>
+        prev.map(app => (app.application_id === application_id ? { ...app, status: originalStatus } : app))
+      );
     }
   };
 
@@ -305,6 +502,13 @@ const Dashboard = () => {
   return (
     <div style={{ padding: "20px" }}>
       <TextModal />
+      <CommentModal 
+        commentModal={commentModal}
+        setCommentModal={setCommentModal}
+        closeCommentModal={closeCommentModal}
+        saveComment={saveComment}
+        textareaRef={textareaRef}
+      />
       <h2>Applications Dashboard</h2>
       
       {/* Charts Section */}
@@ -379,75 +583,125 @@ const Dashboard = () => {
             {filteredApplications.map(app => (
               <tr key={app.application_id} style={{ borderBottom: "1px solid #ddd" }}>
                 <td style={{ padding: "8px" }}>{app.university_id}</td>
-                <td style={{ padding: "8px" }}>{app.full_name}</td>
                 <td style={{ padding: "8px" }}>
-                  <a 
-                    href={`mailto:${app.email}`}
-                    style={{ 
-                      color: 'inherit', 
-                      textDecoration: 'underline',
-                      fontWeight: '500'
-                    }}
-                    onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
-                    onMouseOut={(e) => e.target.style.textDecoration = 'underline'}
-                  >
-                    {app.email}
-                  </a>
+                  <div>
+                    <span
+                      onClick={() => openCommentModal(app)}
+                      style={{
+                        cursor: 'pointer',
+                        color: 'inherit',
+                        textDecoration: 'underline',
+                        fontWeight: '500'
+                      }}
+                      title="Click to add/edit interview comment"
+                    >
+                      {app.full_name}
+                    </span>
+                    <div style={{ fontSize: "10px", color: "#666", marginTop: "2px", fontStyle: "italic" }}>
+                      Click to add comment
+                    </div>
+                  </div>
+                </td>
+                <td style={{ padding: "8px" }}>
+                  <div>
+                    <a 
+                      href={`mailto:${app.email}`}
+                      style={{ 
+                        color: 'inherit', 
+                        textDecoration: 'underline',
+                        fontWeight: '500'
+                      }}
+                      onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
+                      onMouseOut={(e) => e.target.style.textDecoration = 'underline'}
+                    >
+                      {app.email}
+                    </a>
+                    <div style={{ fontSize: "10px", color: "#666", marginTop: "2px", fontStyle: "italic" }}>
+                      Click to send mail
+                    </div>
+                  </div>
                 </td>
                 <td style={{ padding: "8px" }}>{app.faculty}</td>
                 <td style={{ padding: "8px" }}>{app.year}</td>
                 <td style={{ padding: "8px" }}>
-                  <a 
-                    href={`https://wa.me/${app.phone_number.replace(/[^0-9]/g, '')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ 
-                      color: 'inherit', 
-                      textDecoration: 'underline',
-                      fontWeight: '500'
-                    }}
-                    onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
-                    onMouseOut={(e) => e.target.style.textDecoration = 'underline'}
-                  >
-                    {app.phone_number}
-                  </a>
+                  <div>
+                    <a 
+                      href={`https://wa.me/${app.phone_number.replace(/[^0-9]/g, '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ 
+                        color: 'inherit', 
+                        textDecoration: 'underline',
+                        fontWeight: '500'
+                      }}
+                      onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
+                      onMouseOut={(e) => e.target.style.textDecoration = 'underline'}
+                    >
+                      {app.phone_number}
+                    </a>
+                    <div style={{ fontSize: "10px", color: "#666", marginTop: "2px", fontStyle: "italic" }}>
+                      Click to chat on WhatsApp
+                    </div>
+                  </div>
                 </td>
                 <td style={{ padding: "8px" }}>{getDepartmentNameById(app.first_choice)}</td>
                 <td style={{ padding: "8px" }}>
                   {app.second_choice ? getDepartmentNameById(app.second_choice) : "N/A"}
                 </td>
                 <td style={{ padding: "8px", maxWidth: "200px", wordWrap: "break-word" }}>
-                  <span
-                    onClick={() => handleTextClick('skills', app.application_id, app.skills)}
-                    style={{
-                      cursor: app.skills.length > 100 ? 'pointer' : 'default',
-                      color: 'inherit',
-                      textDecoration: app.skills.length > 100 ? 'underline' : 'none'
-                    }}
-                    title={app.skills.length > 100 ? 'Click to view full text' : ''}
-                  >
-                    {app.skills.length > 100 ? `${app.skills.substring(0, 100)}...` : app.skills}
-                  </span>
+                  <div>
+                    <span
+                      onClick={() => handleTextClick('skills', app.application_id, app.skills)}
+                      style={{
+                        cursor: app.skills.length > 100 ? 'pointer' : 'default',
+                        color: 'inherit',
+                        textDecoration: app.skills.length > 100 ? 'underline' : 'none'
+                      }}
+                      title={app.skills.length > 100 ? 'Click to view full text' : ''}
+                    >
+                      {app.skills.length > 100 ? `${app.skills.substring(0, 100)}...` : app.skills}
+                    </span>
+                    {app.skills.length > 100 && (
+                      <div style={{ fontSize: "10px", color: "#666", marginTop: "2px", fontStyle: "italic" }}>
+                        Click to view more
+                      </div>
+                    )}
+                  </div>
                 </td>
                 <td style={{ padding: "8px", maxWidth: "200px", wordWrap: "break-word" }}>
-                  <span
-                    onClick={() => handleTextClick('motivation', app.application_id, app.motivation)}
-                    style={{
-                      cursor: app.motivation.length > 100 ? 'pointer' : 'default',
-                      color: 'inherit',
-                      textDecoration: app.motivation.length > 100 ? 'underline' : 'none'
-                    }}
-                    title={app.motivation.length > 100 ? 'Click to view full text' : ''}
-                  >
-                    {app.motivation.length > 100 ? `${app.motivation.substring(0, 100)}...` : app.motivation}
-                  </span>
+                  <div>
+                    <span
+                      onClick={() => handleTextClick('motivation', app.application_id, app.motivation)}
+                      style={{
+                        cursor: app.motivation.length > 100 ? 'pointer' : 'default',
+                        color: 'inherit',
+                        textDecoration: app.motivation.length > 100 ? 'underline' : 'none'
+                      }}
+                      title={app.motivation.length > 100 ? 'Click to view full text' : ''}
+                    >
+                      {app.motivation.length > 100 ? `${app.motivation.substring(0, 100)}...` : app.motivation}
+                    </span>
+                    {app.motivation.length > 100 && (
+                      <div style={{ fontSize: "10px", color: "#666", marginTop: "2px", fontStyle: "italic" }}>
+                        Click to view more
+                      </div>
+                    )}
+                  </div>
                 </td>
                 <td style={{ padding: "8px" }}>{app.interview}</td>
                 <td style={{ padding: "8px" }}>
                   <select
                     value={app.status}
                     onChange={e => handleStatusChange(app.application_id, e.target.value)}
-                    style={{ padding: "4px", fontSize: "12px", backgroundColor: "#395a7f" }}
+                    style={{ 
+                      padding: "4px", 
+                      fontSize: "12px", 
+                      backgroundColor: getStatusColor(app.status),
+                      color: "white",
+                      border: "none",
+                      borderRadius: "3px",
+                      cursor: "pointer"
+                    }}
                   >
                     <option value="pending">Pending</option>
                     <option value="approved">Approved</option>
