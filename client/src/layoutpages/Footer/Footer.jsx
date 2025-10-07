@@ -2,6 +2,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import './Footer.css';
 
+import mspLogo from '../../assets/Images/msp-logo.png';
+
 const social = [
   { href: 'https://www.tiktok.com/@mspmiu', label: 'TikTok', icon: (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.5 3.5c-.1 0-.2 0-.3.1-1.4.9-2.8 1.2-4.1 1.2v6.2c0 1.8-.7 3.4-2 4.6-1.1 1-2.6 1.6-4.2 1.6-3.3 0-6-2.7-6-6s2.7-6 6-6c.3 0 .6 0 .9.1v2.1c-.3-.1-.6-.1-.9-.1-2.2 0-4 1.8-4 4s1.8 4 4 4c1.1 0 2.1-.4 2.9-1.1 1-1 1.6-2.5 1.6-4.1V4.7c1.6 0 3.1-.4 4.6-1.3.1 0 .2-.1.2-.2.1-.1 0-.2-.1-.2z"/></svg>
@@ -31,7 +33,10 @@ export const Footer = () => {
     >
       <div className="Footer__grid">
         <section className="Footer__brand" aria-labelledby="footer-brand-heading">
-          <h2 id="footer-brand-heading" className="Footer__logo">MSP Tech Club</h2>
+          <div style={{display: 'flex', alignItems: 'center', gap: '0.7rem'}}>
+            <img src={mspLogo} alt="MSP Logo" className="Footer__logoImg" height={36} width={36} />
+            <h2 id="footer-brand-heading" className="Footer__logo">MSP Tech Club</h2>
+          </div>
           <p className="Footer__vision">Our Vision: <span>Empowering students through innovation, collaboration, and continuous learning.</span></p>
         </section>
         <section className="Footer__social" aria-labelledby="footer-social-heading">
