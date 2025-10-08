@@ -21,7 +21,7 @@
     animation: heroPulse 8s linear infinite;
 }
 
-.GalleryBg{
+.GalleryBg {
     position: absolute;
     inset: 0;
     animation: heroPulse 8s linear infinite;
@@ -122,6 +122,26 @@
     color: #C7D6E2;
 }
 
+.TriadCard__icon {
+    width: 54px;
+    height: 54px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 18px;
+    margin: 0 0 20px;
+    background: linear-gradient(135deg, rgba(0, 160, 255, .35), rgba(0, 119, 204, .15));
+    color: #E5F6FF;
+    font-size: 1.65rem;
+    position: relative;
+    box-shadow: 0 6px 18px -8px rgba(0, 160, 255, .45), 0 0 0 1px rgba(255, 255, 255, .08);
+    transition: box-shadow .6s, transform .6s;
+}
+
+.TriadCard:hover .TriadCard__icon {
+    box-shadow: 0 8px 26px -6px rgba(0, 160, 255, .6), 0 0 0 1px rgba(0, 160, 255, .35);
+}
+
 /* Meaning Section */
 .AboutMeaning {
     position: relative;
@@ -180,6 +200,43 @@
 .AboutMeaning__text .hi:hover {
     color: #fff;
     text-shadow: 0 0 12px rgba(0, 160, 255, .7);
+}
+
+.AboutMeaning__iconList {
+    list-style: none;
+    margin: 10px 0 30px;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 18px 28px;
+}
+
+.AboutMeaning__iconList li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: .9rem;
+    letter-spacing: .4px;
+    background: rgba(255, 255, 255, .05);
+    border: 1px solid rgba(255, 255, 255, .09);
+    padding: 12px 16px 13px;
+    border-radius: 16px;
+    color: #BFD8EA;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px) saturate(150%);
+    transition: background .5s, box-shadow .6s, transform .5s;
+}
+
+.AboutMeaning__iconList li svg {
+    font-size: 1.1rem;
+    color: #8EC2F0;
+    filter: drop-shadow(0 0 6px rgba(0, 160, 255, .55));
+}
+
+.AboutMeaning__iconList li:hover {
+    background: rgba(255, 255, 255, .08);
+    box-shadow: 0 8px 28px -10px rgba(0, 0, 0, .55), 0 0 0 1px rgba(0, 160, 255, .35);
 }
 
 /* Timeline */
@@ -284,6 +341,28 @@
     line-height: 1.55;
 }
 
+.TimelineItem__iconWrap {
+    position: absolute;
+    top: -6px;
+    left: calc(100% + 26px);
+    width: 46px;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(0, 160, 255, .32), rgba(0, 119, 204, .18));
+    border: 1px solid rgba(255, 255, 255, .18);
+    border-radius: 16px;
+    color: #EAF7FF;
+    font-size: 1.3rem;
+    box-shadow: 0 6px 18px -8px rgba(0, 160, 255, .5), 0 0 0 1px rgba(0, 160, 255, .25);
+    backdrop-filter: blur(10px) saturate(160%);
+}
+
+.TimelineItem--right .TimelineItem__iconWrap {
+    left: -72px;
+}
+
 /* CTA */
 .AboutCTA {
     position: relative;
@@ -366,6 +445,21 @@
 
 .Btn--outline:hover {
     background: rgba(255, 255, 255, .08);
+}
+
+.Btn__icon {
+    margin-right: 10px;
+    font-size: 1.05rem;
+}
+
+.Btn__icon--trail {
+    margin-left: 10px;
+    margin-right: 0;
+}
+
+.Btn:hover .Btn__icon,
+.Btn:hover .Btn__icon--trail {
+    filter: drop-shadow(0 0 6px rgba(0, 160, 255, .6));
 }
 
 /* Utilities / Responsiveness */
