@@ -16,20 +16,20 @@ const EventsSection = () => {
       <div className="Events__head">
         
         <CurvedLoop
-          marqueeText="MSP Tech Club ✦ Upcoming Events ✦ Sessions ✦ Innovation ✦ Community ✦ Join Us ✦"
+          marqueeText="UPCOMING EVENTS ✦ SESSIONS ✦ INNOVATION ✦ COMMUNITY ✦ COLLABORATION ✦ GROWTH ✦"
           speed={1}
-          curveAmount={20}
+          curveAmount={30}
           direction="right"
           interactive={true}
-          className="Events__marquee"
+          className="Events__marquee Events__marquee--cyan"
         />
         <CurvedLoop
-          marqueeText="MSP Tech Club ✦ Upcoming Events ✦ Sessions ✦ Innovation ✦ Community ✦ Join Us ✦"
+          marqueeText="LEARN ✦ BUILD ✦ SHARE ✦ LEAD ✦ CREATE ✦ NETWORK ✦ ACHIEVE ✦ IMPACT ✦"
           speed={1}
-          curveAmount={20}
+          curveAmount={30}
           direction="left"
           interactive={true}
-          className="Events__marquee"
+          className="Events__marquee Events__marquee--orange"
         />
         <h2 id="events-heading" className="Events__title">Latest Sessions & Events</h2>
       </div>
