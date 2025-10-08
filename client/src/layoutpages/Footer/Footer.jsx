@@ -33,19 +33,44 @@ export const Footer = () => {
     >
       <div className="Footer__grid">
         <section className="Footer__brand" aria-labelledby="footer-brand-heading">
-          <div style={{display: 'flex', alignItems: 'center', gap: '0.7rem'}}>
-            <img src={mspLogo} alt="MSP Logo" className="Footer__logoImg" height={36} width={36} />
-            <h2 id="footer-brand-heading" className="Footer__logo">MSP Tech Club</h2>
-          </div>
+          <motion.div style={{display: 'flex', alignItems: 'center', gap: '0.7rem'}} whileHover={{ scale: 1.04 }} transition={{ type: 'spring', stiffness: 300, damping: 22 }}>
+            <motion.img
+              src={mspLogo}
+              alt="MSP Logo"
+              className="Footer__logoImg"
+              height={166}
+              width={186}
+              whileHover={{ filter: 'drop-shadow(0 0 10px rgba(3,169,244,.75)) brightness(1.1)' }}
+              transition={{ type: 'spring', stiffness: 260, damping: 18 }}
+            />
+            <motion.h2
+              id="footer-brand-heading"
+              className="Footer__logo"
+              whileHover={{ textShadow: '0 0 14px rgba(3,169,244,.85)', scale: 1.02 }}
+              transition={{ duration: .4 }}
+            >MSP Tech Club</motion.h2>
+          </motion.div>
           <p className="Footer__vision">Our Vision: <span>Empowering students through innovation, collaboration, and continuous learning.</span></p>
         </section>
         <section className="Footer__social" aria-labelledby="footer-social-heading">
           <h3 id="footer-social-heading" className="Footer__heading">Connect</h3>
           <ul className="Footer__socialList">
             {social.map(s => (
-              <li key={s.label}>
-                <a href={s.href} target="_blank" rel="noreferrer" aria-label={s.label} className="Footer__socialLink">{s.icon}<span>{s.label}</span></a>
-              </li>
+              <motion.li key={s.label} whileHover={{ y: -3 }} transition={{ type: 'spring', stiffness: 320, damping: 20 }}>
+                <motion.a
+                  href={s.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={s.label}
+                  className="Footer__socialLink"
+                  whileHover={{ background: 'rgba(255,255,255,0.14)', color: '#fff', boxShadow: '0 0 14px -2px rgba(3,169,244,.65), 0 0 32px -6px rgba(0,119,204,.55)' }}
+                  whileTap={{ scale: 0.94 }}
+                  transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+                >
+                  <motion.span style={{display:'inline-flex'}} whileHover={{ rotate: 5 }} transition={{ type: 'spring', stiffness: 260, damping: 16 }}>{s.icon}</motion.span>
+                  <motion.span whileHover={{ letterSpacing: '1px' }} transition={{ duration: .45 }}>{s.label}</motion.span>
+                </motion.a>
+              </motion.li>
             ))}
           </ul>
         </section>

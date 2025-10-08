@@ -50,17 +50,43 @@ const Navbar = () => {
   return (
     <header className={`Navbar Navbar--flat ${scrolled ? 'Navbar--scrolled' : ''}`}>      
       <div className="Navbar__inner">
-        <NavLink to="/" className="Navbar__brand" onClick={closeMobile} aria-label="MSP Home">
-          <img src={mspLogo} alt="MSP Logo" className="Navbar__logoImg" height={40} width={50} style={{marginRight: '0.5rem'}} />
-          <div className="Navbar__logoMark">MSP</div>
-          <div className="Navbar__logoText">Tech Club</div>
-        </NavLink>
+        <motion.div whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.97 }} transition={{ type: 'spring', stiffness: 360, damping: 22 }}>
+          <NavLink to="/" className="Navbar__brand" onClick={closeMobile} aria-label="MSP Home">
+            <motion.img
+              src={mspLogo}
+              alt="MSP Logo"
+              className="Navbar__logoImg"
+              height={40}
+              width={50}
+              style={{ marginRight: '0.5rem' }}
+              whileHover={{ filter: 'drop-shadow(0 0 6px rgba(3,169,244,.8)) brightness(1.15)' }}
+              transition={{ type: 'spring', stiffness: 280, damping: 18 }}
+            />
+            <motion.div className="Navbar__logoMark" layout whileHover={{ textShadow: '0 0 12px rgba(3,169,244,.9)' }} transition={{ duration: .35 }}>
+              MSP
+            </motion.div>
+            <motion.div className="Navbar__logoText" whileHover={{ color: '#fff' }} transition={{ duration: .35 }}>Tech Club</motion.div>
+          </NavLink>
+        </motion.div>
         <motion.ul className="Navbar__links" variants={navMotion} initial="hidden" animate="visible">
           {links.map(l => (
-            <motion.li key={l.to} variants={itemMotion}>
-              <NavLink to={l.to} onClick={closeMobile} className={({ isActive }) => `NavItem ${isActive ? 'is-active' : ''}`}>
-                <span className="NavItem__icon">{l.icon}</span>
-                <span className="NavItem__label">{l.label}</span>
+            <motion.li key={l.to} variants={itemMotion} whileHover={{ y: -2 }} transition={{ type: 'spring', stiffness: 400, damping: 26 }}>
+              <NavLink
+                to={l.to}
+                onClick={closeMobile}
+                className={({ isActive }) => `NavItem ${isActive ? 'is-active' : ''}`}
+              >
+                <motion.span className="NavItem__icon" whileHover={{ scale: 1.15 }} transition={{ type: 'spring', stiffness: 380, damping: 20 }}>
+                  {l.icon}
+                </motion.span>
+                <motion.span className="NavItem__label" whileHover={{ color: '#ffffff' }} transition={{ duration: .35 }}>{l.label}</motion.span>
+                <motion.span
+                  className="NavItem__underline"
+                  layoutId={`nav-underline-${l.to}`}
+                  initial={false}
+                  whileHover={{ scaleX: 1, opacity: 1 }}
+                  transition={{ duration: .4, ease: 'easeOut' }}
+                />
               </NavLink>
             </motion.li>
           ))}
@@ -85,16 +111,16 @@ const Navbar = () => {
               >
                 <ul className="NavDrawer__list">
                   {links.map(l => (
-                    <li key={l.to}>
+                    <motion.li key={l.to} whileHover={{ x: 4 }} transition={{ type: 'spring', stiffness: 340, damping: 26 }}>
                       <NavLink
                         to={l.to}
                         onClick={closeMobile}
                         className={({ isActive }) => `NavDrawer__link ${isActive ? 'is-active' : ''}`}
                       >
-                        <span className="NavDrawer__icon">{l.icon}</span>
-                        <span className="NavDrawer__label">{l.label}</span>
+                        <motion.span className="NavDrawer__icon" whileHover={{ scale: 1.2, rotate: 3 }} transition={{ type: 'spring', stiffness: 360, damping: 18 }}>{l.icon}</motion.span>
+                        <motion.span className="NavDrawer__label" whileHover={{ color: '#fff' }} transition={{ duration: .3 }}>{l.label}</motion.span>
                       </NavLink>
-                    </li>
+                    </motion.li>
                   ))}
                 </ul>
               </motion.div>

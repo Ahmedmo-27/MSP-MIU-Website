@@ -12,9 +12,11 @@ import Events from './pages/Events';
 import Suggestions from './pages/Suggestions';
 import Leaderboard from './pages/Leaderboard';
 import Sponsors from './pages/Sponsors';
+import CustomCursor from './components/CustomCursor/CustomCursor';
 
 const AppRouter = () => (
   <Router>
+    <CustomCursor />
     <Routes>
       <Route path="/" element={<SiteLayout><Home /></SiteLayout>} />
       <Route path="/about" element={<SiteLayout><About /></SiteLayout>} />
