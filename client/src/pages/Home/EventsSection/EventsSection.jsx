@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import CurvedLoop from '../../../components/CurvedLoop/CurvedLoop';
 import './EventsSection.css';
 
 const mockEvents = [
@@ -12,7 +13,26 @@ const mockEvents = [
 const EventsSection = () => {
   return (
     <section className="Events" aria-labelledby="events-heading">
-      <div className="Events__head"><h2 id="events-heading" className="Events__title">Latest Sessions & Events</h2></div>
+      <div className="Events__head">
+        
+        <CurvedLoop
+          marqueeText="MSP Tech Club ✦ Upcoming Events ✦ Sessions ✦ Innovation ✦ Community ✦ Join Us ✦"
+          speed={1}
+          curveAmount={20}
+          direction="right"
+          interactive={true}
+          className="Events__marquee"
+        />
+        <CurvedLoop
+          marqueeText="MSP Tech Club ✦ Upcoming Events ✦ Sessions ✦ Innovation ✦ Community ✦ Join Us ✦"
+          speed={1}
+          curveAmount={20}
+          direction="left"
+          interactive={true}
+          className="Events__marquee"
+        />
+        <h2 id="events-heading" className="Events__title">Latest Sessions & Events</h2>
+      </div>
       <div className="Events__grid">
         {mockEvents.map(ev => (
           <motion.article
