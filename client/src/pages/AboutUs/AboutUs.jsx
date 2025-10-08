@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import './AboutUs.css';
+import CircularGallery from '../../components/CircularGallery/CircularGallery';
 
 const heroParent = {
   hidden: { opacity: 0 },
@@ -35,6 +36,29 @@ const AboutUs = () => {
           <motion.h1 variants={fadeUp} id="about-hero-heading" className="AboutHero__title">About MSP Tech Club</motion.h1>
           <motion.p variants={fadeUp} className="AboutHero__subtitle">Placeholder introductory text that briefly explains the club purpose, focus areas, and energy.</motion.p>
         </motion.div>
+      </section>
+
+      <section className="AboutGallery" aria-label="Showcase Gallery">
+        <div className="GalleryBg" aria-hidden="true" />
+        <div className="AboutGallery__viewport">
+          <CircularGallery
+            bend={-3}
+            borderRadius={0.08}
+            textColor="#8EC2F0"
+            scrollSpeed={2.4}
+            scrollEase={0.36}
+            itemBaseWidth={860}
+            itemBaseHeight={840}
+            items={[
+              { image: 'https://picsum.photos/seed/a1/800/600?grayscale', text: 'Placeholder One' },
+              { image: 'https://picsum.photos/seed/a2/800/600?grayscale', text: 'Placeholder Two' },
+              { image: 'https://picsum.photos/seed/a3/800/600?grayscale', text: 'Placeholder Three' },
+              { image: 'https://picsum.photos/seed/a4/800/600?grayscale', text: 'Placeholder Four' },
+              { image: 'https://picsum.photos/seed/a5/800/600?grayscale', text: 'Placeholder Five' },
+              { image: 'https://picsum.photos/seed/a6/800/600?grayscale', text: 'Placeholder Six' }
+            ]}
+          />
+        </div>
       </section>
 
       <section className="AboutTriad" aria-label="Mission Vision Values">
