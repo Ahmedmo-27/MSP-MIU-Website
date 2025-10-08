@@ -38,12 +38,13 @@ export const HeroSection = () => {
         <div className="Hero__col Hero__col--model">
           <motion.div className="Hero__modelWrap" initial={{ opacity: 0, scale: .85 }} whileInView={{ opacity: 1, scale: 1, transition: { duration: .9, ease: 'easeOut', delay: .25 } }} viewport={{ once: true, amount: 0.4 }}>
             <model-viewer 
-              src="/src/assets/models3d/robot1.glb" 
+              src="/src/assets/models3d/robotmsp2.glb" 
               alt="MSP 3D Logo Model"
               auto-rotate
               camera-controls
               shadow-intensity="1"
               exposure="1"
+              loading="lazy"
               class="Hero__model"
             ></model-viewer>
             <div className="Hero__glow" />
