@@ -71,7 +71,7 @@ const AboutUs = () => {
             itemBaseHeight={840}
             items={[
               { image: 'https://picsum.photos/seed/a1/800/600?grayscale', text: 'Placeholder One' },
-              { image: 'https://picsum.photos/seed/a2/800/600?grayscale', text: 'Placeholder Two' },
+              { image: 'https://picsum.photos/seed/a6/800/600?grayscale', text: 'Placeholder Two' },
               { image: 'https://picsum.photos/seed/a3/800/600?grayscale', text: 'Placeholder Three' },
               { image: 'https://picsum.photos/seed/a4/800/600?grayscale', text: 'Placeholder Four' },
               { image: 'https://picsum.photos/seed/a5/800/600?grayscale', text: 'Placeholder Five' },
