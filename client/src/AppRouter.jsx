@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import SiteLayout from './layoutpages/SiteLayout';
 import Home from './pages/Home';
-import About from './pages/About';
+import AboutUs from './pages/AboutUs/AboutUs';
 import Board from './pages/Board';
 import BecomeMember from './pages/BecomeMember';
 import Login from './pages/Login';
@@ -19,7 +19,7 @@ const AppRouter = () => (
     <CustomCursor />
     <Routes>
       <Route path="/" element={<SiteLayout><Home /></SiteLayout>} />
-      <Route path="/about" element={<SiteLayout><About /></SiteLayout>} />
+  <Route path="/about" element={<SiteLayout><AboutUs /></SiteLayout>} />
       <Route path="/board" element={<SiteLayout><Board /></SiteLayout>} />
       <Route path="/become-member" element={<SiteLayout><BecomeMember /></SiteLayout>} />
       <Route path="/login" element={<SiteLayout><Login /></SiteLayout>} />
