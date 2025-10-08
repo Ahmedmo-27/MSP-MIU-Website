@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import TextType from '../../../components/TextType/TextType';
 import './HeroSection.css';
 
 const headingVariant = {
@@ -24,9 +25,24 @@ export const HeroSection = () => {
     <section className="Hero" aria-labelledby="hero-heading">
       <div className="Hero__inner">
         <div className="Hero__col Hero__col--text">
-          <motion.h1 id="hero-heading" className="Hero__title" initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.6 }} variants={headingVariant}>
-            Empowering <span>Future Tech Leaders</span>
-          </motion.h1>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+          >
+            <TextType
+              text={[
+                "Empowering Future Tech Leaders",
+                "Driving Innovation Through Technology",
+                "Building a Connected Community"
+              ]}
+              typingSpeed={75}
+              pauseDuration={1500}
+              showCursor={true}
+              cursorCharacter="|"
+              className="Hero__title"
+            />
+          </motion.div>
           <motion.p className="Hero__subtitle" initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.6 }} variants={subVariant}>
             MSP Tech Club is a community-driven hub fostering innovation, collaboration, and growth through technology, events, sessions, and real-world impact.
           </motion.p>
