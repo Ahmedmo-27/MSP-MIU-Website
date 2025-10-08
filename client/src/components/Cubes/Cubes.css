@@ -13,6 +13,13 @@
   height: auto;
 }
 
+/* Stretch variant when used as a section background (e.g., Sponsors__bg) */
+.Sponsors__bg .default-animation {
+  width: 100% !important;
+  height: 100% !important;
+  aspect-ratio: auto !important;
+}
+
 .default-animation--scene {
   display: grid;
   width: 100%;
