@@ -1,9 +1,22 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useEffect, useState, useCallback, useRef, useMemo, memo } from "react";
 import ApiService from "../services/api";
 import { getDepartmentNameById } from "../data/departments";
 
+// Debounce utility function
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
 // Comment Modal Component - moved outside to prevent re-renders
-const CommentModal = ({ commentModal, setCommentModal, closeCommentModal, saveComment, textareaRef }) => {
+const CommentModal = memo(({ commentModal, setCommentModal, closeCommentModal, saveComment, textareaRef }) => {
   if (!commentModal.isOpen) return null;
 
   return (
@@ -120,9 +133,11 @@ const CommentModal = ({ commentModal, setCommentModal, closeCommentModal, saveCo
       </div>
     </div>
   );
-};
+});
 
-const Dashboard = () => {
+CommentModal.displayName = 'CommentModal';
+
+const Dashboard = memo(() => {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -131,15 +146,15 @@ const Dashboard = () => {
   const [commentModal, setCommentModal] = useState({ isOpen: false, application: null, comment: '' });
   const textareaRef = useRef(null);
 
-  // Chart colors - more distinguished and vibrant
-  const chartColors = [
+  // Chart colors - memoized to prevent recreation
+  const chartColors = useMemo(() => [
     '#395a7f', '#e74c3c', '#27ae60', '#f39c12', '#9b59b6', '#1abc9c',
     '#34495e', '#e67e22', '#3498db', '#2ecc71', '#8e44ad', '#f1c40f',
     '#e91e63', '#00bcd4', '#4caf50', '#ff9800', '#795548', '#607d8b'
-  ];
+  ], []);
 
-  // Process data for charts
-  const getChartData = (applications, field, fieldName = 'Unknown') => {
+  // Process data for charts - memoized
+  const getChartData = useCallback((applications, field, fieldName = 'Unknown') => {
     const counts = {};
     applications.forEach(app => {
       let value = app[field];
@@ -160,11 +175,11 @@ const Dashboard = () => {
         color: chartColors[index % chartColors.length]
       }))
       .sort((a, b) => b.count - a.count); // Sort by count (highest to lowest)
-  };
+  }, [chartColors]);
 
-  const firstChoiceData = getChartData(applications, 'first_choice');
-  const secondChoiceData = getChartData(applications, 'second_choice');
-  const facultyData = getChartData(applications, 'faculty');
+  const firstChoiceData = useMemo(() => getChartData(applications, 'first_choice'), [applications, getChartData]);
+  const secondChoiceData = useMemo(() => getChartData(applications, 'second_choice'), [applications, getChartData]);
+  const facultyData = useMemo(() => getChartData(applications, 'faculty'), [applications, getChartData]);
 
   // Function to handle text expansion
   const handleTextClick = (field, appId, text) => {
@@ -429,15 +444,15 @@ const Dashboard = () => {
     fetchApplications();
   }, []);
 
-  // Filter applications based on search term
-  useEffect(() => {
-    console.log("Search term:", searchTerm);
-    console.log("Applications count:", applications.length);
-    
-    const filtered = applications.filter(app => {
-      if (!searchTerm) return true; // Show all if no search term
+  // Debounced search function
+  const debouncedSearch = useCallback(
+    debounce((term, apps) => {
+      if (!term) {
+        setFilteredApplications(apps);
+        return;
+      }
       
-      const searchLower = searchTerm.toLowerCase();
+      const searchLower = term.toLowerCase();
       
       // Helper function to safely convert to string and check
       const checkField = (field) => {
@@ -445,7 +460,7 @@ const Dashboard = () => {
         return String(field).toLowerCase().includes(searchLower);
       };
       
-      return (
+      const filtered = apps.filter(app => (
         checkField(app.university_id) ||
         checkField(app.full_name) ||
         checkField(app.email) ||
@@ -459,12 +474,17 @@ const Dashboard = () => {
         checkField(app.interview) ||
         checkField(app.status) ||
         checkField(app.comment)
-      );
-    });
-    
-    console.log("Filtered applications count:", filtered.length);
-    setFilteredApplications(filtered);
-  }, [searchTerm, applications]);
+      ));
+      
+      setFilteredApplications(filtered);
+    }, 300),
+    []
+  );
+
+  // Filter applications based on search term
+  useEffect(() => {
+    debouncedSearch(searchTerm, applications);
+  }, [searchTerm, applications, debouncedSearch]);
 
   const handleStatusChange = async (application_id, newStatus) => {
     // Store original status for potential rollback
@@ -719,6 +739,8 @@ const Dashboard = () => {
       </p>
     </div>
   );
-};
+});
+
+Dashboard.displayName = 'Dashboard';
 
 export default Dashboard;

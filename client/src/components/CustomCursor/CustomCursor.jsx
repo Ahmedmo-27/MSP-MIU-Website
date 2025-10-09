@@ -1,10 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback, memo } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 import './CustomCursor.css';
 
 // Functional component implementing a smooth, animated custom cursor
-const CustomCursor = () => {
+const CustomCursor = memo(() => {
   const [active, setActive] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
   const x = useMotionValue(-100);
   const y = useMotionValue(-100);
 
@@ -12,16 +13,53 @@ const CustomCursor = () => {
   const springX = useSpring(x, { stiffness: 380, damping: 32, mass: 0.6 });
   const springY = useSpring(y, { stiffness: 380, damping: 32, mass: 0.6 });
 
+  // Memoized event handlers
+  const move = useCallback((e) => {
+    x.set(e.clientX);
+    y.set(e.clientY);
+  }, [x, y]);
+
+  const activate = useCallback(() => setActive(true), []);
+  const deactivate = useCallback(() => setActive(false), []);
+
   useEffect(() => {
-    const move = (e) => {
-      x.set(e.clientX);
-      y.set(e.clientY);
+    // Check if device supports mouse (desktop)
+    const checkIsDesktop = () => {
+      const isDesktopDevice = window.matchMedia('(min-width: 781px)').matches && 
+                             window.matchMedia('(hover: hover)').matches;
+      setIsDesktop(isDesktopDevice);
+      
+      if (isDesktopDevice) {
+        // Hide default cursor on desktop
+        document.body.style.cursor = 'none';
+        // Also ensure all elements have cursor none
+        document.documentElement.style.cursor = 'none';
+      } else {
+        // Restore default cursor on mobile
+        document.body.style.cursor = 'auto';
+        document.documentElement.style.cursor = 'auto';
+      }
+    };
+    
+    checkIsDesktop();
+    
+    // Listen for window resize to handle device changes
+    const handleResize = () => checkIsDesktop();
+    window.addEventListener('resize', handleResize);
+    
+    // Throttle mousemove events for better performance
+    let ticking = false;
+    const throttledMove = (e) => {
+      if (!ticking && isDesktop) {
+        requestAnimationFrame(() => {
+          move(e);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
-    const activate = () => setActive(true);
-    const deactivate = () => setActive(false);
-
-    window.addEventListener('mousemove', move, { passive: true });
+    window.addEventListener('mousemove', throttledMove, { passive: true });
 
     // Delegate interactive targets
     const interactiveSelectors = 'a, button, input, textarea, select, [role="button"], .interactive';
@@ -39,14 +77,24 @@ const CustomCursor = () => {
     observer.observe(document.body, { childList: true, subtree: true });
 
     return () => {
-      window.removeEventListener('mousemove', move);
+      // Restore default cursor on unmount
+      document.body.style.cursor = 'auto';
+      document.documentElement.style.cursor = 'auto';
+      
+      window.removeEventListener('mousemove', throttledMove);
+      window.removeEventListener('resize', handleResize);
       observer.disconnect();
       document.querySelectorAll(interactiveSelectors).forEach(el => {
         el.removeEventListener('mouseenter', activate);
         el.removeEventListener('mouseleave', deactivate);
       });
     };
-  }, [x, y]);
+  }, [move, activate, deactivate]);
+
+  // Only render custom cursor on desktop devices
+  if (!isDesktop) {
+    return null;
+  }
 
   return (
     <motion.div
@@ -61,6 +109,8 @@ const CustomCursor = () => {
       <div className="CustomCursor__core" />
     </motion.div>
   );
-};
+});
+
+CustomCursor.displayName = 'CustomCursor';
 
 export default CustomCursor;

@@ -1,8 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, memo } from 'react';
 import { motion } from 'framer-motion';
 import './FeedSection.css';
 
-const FeedSection = ({ isMember = false }) => {
+const FeedSection = memo(({ isMember = false }) => {
   const announcements = useMemo(() => ([
     { id: 'a1', title: 'Welcome New Members', dept: 'Community', date: '2025-10-01', desc: 'Kickoff meetup next week – stay tuned!', priority: true },
     { id: 'a2', title: 'AI Bootcamp Signup', dept: 'AI', date: '2025-10-02', desc: 'Limited seats for intensive ML crash course.', priority: false },
@@ -45,6 +45,8 @@ const FeedSection = ({ isMember = false }) => {
       </div>
     </section>
   );
-};
+});
+
+FeedSection.displayName = 'FeedSection';
 
 export default FeedSection;

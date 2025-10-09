@@ -1,9 +1,9 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useMemo, memo } from 'react';
 import './Footer.css';
 
 import mspLogo from '../../assets/Images/msp-logo.png';
 
+// Memoized social links array
 const social = [
   { href: 'https://www.tiktok.com/@mspmiu', label: 'TikTok', icon: (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.5 3.5c-.1 0-.2 0-.3.1-1.4.9-2.8 1.2-4.1 1.2v6.2c0 1.8-.7 3.4-2 4.6-1.1 1-2.6 1.6-4.2 1.6-3.3 0-6-2.7-6-6s2.7-6 6-6c.3 0 .6 0 .9.1v2.1c-.3-.1-.6-.1-.9-.1-2.2 0-4 1.8-4 4s1.8 4 4 4c1.1 0 2.1-.4 2.9-1.1 1-1 1.6-2.5 1.6-4.1V4.7c1.6 0 3.1-.4 4.6-1.3.1 0 .2-.1.2-.2.1-.1 0-.2-.1-.2z"/></svg>
@@ -16,61 +16,43 @@ const social = [
   ) }
 ];
 
-const containerVariants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: 'easeOut' } }
-};
-
-export const Footer = () => {
-  const year = new Date().getFullYear();
+export const Footer = memo(() => {
+  const year = useMemo(() => new Date().getFullYear(), []);
   return (
-    <motion.footer
-      className="Footer"
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.2 }}
-      variants={containerVariants}
-    >
+    <footer className="Footer Footer--animate">
       <div className="Footer__grid">
         <section className="Footer__brand" aria-labelledby="footer-brand-heading">
-          <motion.div style={{display: 'flex', alignItems: 'center', gap: '0.7rem'}} whileHover={{ scale: 1.04 }} transition={{ type: 'spring', stiffness: 300, damping: 22 }}>
-            <motion.img
+          <div className="Footer__brandContainer">
+            <img
               src={mspLogo}
               alt="MSP Logo"
               className="Footer__logoImg"
               height={166}
               width={186}
-              whileHover={{ filter: 'drop-shadow(0 0 10px rgba(3,169,244,.75)) brightness(1.1)' }}
-              transition={{ type: 'spring', stiffness: 260, damping: 18 }}
             />
-            <motion.h2
+            <h2
               id="footer-brand-heading"
               className="Footer__logo"
-              whileHover={{ textShadow: '0 0 14px rgba(3,169,244,.85)', scale: 1.02 }}
-              transition={{ duration: .4 }}
-            >MSP Tech Club</motion.h2>
-          </motion.div>
+            >MSP Tech Club</h2>
+          </div>
           <p className="Footer__vision">Our Vision: <span>Empowering students through innovation, collaboration, and continuous learning.</span></p>
         </section>
         <section className="Footer__social" aria-labelledby="footer-social-heading">
           <h3 id="footer-social-heading" className="Footer__heading">Connect</h3>
           <ul className="Footer__socialList">
             {social.map(s => (
-              <motion.li key={s.label} whileHover={{ y: -3 }} transition={{ type: 'spring', stiffness: 320, damping: 20 }}>
-                <motion.a
+              <li key={s.label} className="Footer__socialItem">
+                <a
                   href={s.href}
                   target="_blank"
                   rel="noreferrer"
                   aria-label={s.label}
                   className="Footer__socialLink"
-                  whileHover={{ background: 'rgba(255,255,255,0.14)', color: '#fff', boxShadow: '0 0 14px -2px rgba(3,169,244,.65), 0 0 32px -6px rgba(0,119,204,.55)' }}
-                  whileTap={{ scale: 0.94 }}
-                  transition={{ type: 'spring', stiffness: 360, damping: 22 }}
                 >
-                  <motion.span style={{display:'inline-flex'}} whileHover={{ rotate: 5 }} transition={{ type: 'spring', stiffness: 260, damping: 16 }}>{s.icon}</motion.span>
-                  <motion.span whileHover={{ letterSpacing: '1px' }} transition={{ duration: .45 }}>{s.label}</motion.span>
-                </motion.a>
-              </motion.li>
+                  <span className="Footer__socialIcon">{s.icon}</span>
+                  <span className="Footer__socialLabel">{s.label}</span>
+                </a>
+              </li>
             ))}
           </ul>
         </section>
@@ -79,8 +61,10 @@ export const Footer = () => {
           <p className="Footer__copy">&copy; {year} MSP Tech Club MIU. All rights reserved.</p>
         </section>
       </div>
-    </motion.footer>
+    </footer>
   );
-};
+});
+
+Footer.displayName = 'Footer';
 
 export default Footer;

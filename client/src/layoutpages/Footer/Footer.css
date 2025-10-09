@@ -8,6 +8,22 @@
     overflow: hidden;
 }
 
+/* CSS animations to replace Framer Motion */
+.Footer--animate {
+    animation: footerSlideIn 0.45s ease-out;
+}
+
+@keyframes footerSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .Footer:before {
     content: "";
     position: absolute;
@@ -35,6 +51,27 @@
     vertical-align: middle;
     object-fit: contain;
     margin-right: 0.5rem;
+    transition: filter 0.3s ease, transform 0.3s ease;
+}
+
+.Footer__brandContainer {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    transition: transform 0.3s ease;
+}
+
+.Footer__brandContainer:hover {
+    transform: scale(1.04);
+}
+
+.Footer__brandContainer:hover .Footer__logoImg {
+    filter: drop-shadow(0 0 10px rgba(3,169,244,.75)) brightness(1.1);
+}
+
+.Footer__brandContainer:hover .Footer__logo {
+    text-shadow: 0 0 14px rgba(3,169,244,.85);
+    transform: scale(1.02);
 }
 
 .Footer__grid {
@@ -88,6 +125,14 @@
     gap: 10px;
 }
 
+.Footer__socialItem {
+    transition: transform 0.3s ease;
+}
+
+.Footer__socialItem:hover {
+    transform: translateY(-3px);
+}
+
 .Footer__socialLink {
     text-decoration: none;
     display: inline-flex;
@@ -101,12 +146,31 @@
     font-size: .9rem;
     font-weight: 500;
     letter-spacing: .3px;
-    transition: background .25s, color .25s, transform .25s;
+    transition: background 0.3s ease, color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .Footer__socialLink:hover {
-    background: rgba(255, 255, 255, 0.11);
+    background: rgba(255, 255, 255, 0.14);
     color: #fff;
+    box-shadow: 0 0 14px -2px rgba(3,169,244,.65), 0 0 32px -6px rgba(0,119,204,.55);
+    transform: scale(0.98);
+}
+
+.Footer__socialIcon {
+    display: inline-flex;
+    transition: transform 0.3s ease;
+}
+
+.Footer__socialLink:hover .Footer__socialIcon {
+    transform: rotate(5deg);
+}
+
+.Footer__socialLabel {
+    transition: letter-spacing 0.45s ease;
+}
+
+.Footer__socialLink:hover .Footer__socialLabel {
+    letter-spacing: 1px;
 }
 
 .Footer__socialLink:focus {

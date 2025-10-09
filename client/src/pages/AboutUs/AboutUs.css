@@ -21,11 +21,6 @@
     animation: heroPulse 8s linear infinite;
 }
 
-.GalleryBg {
-    position: absolute;
-    inset: 0;
-    animation: heroPulse 8s linear infinite;
-}
 
 @keyframes heroPulse {
 
@@ -530,59 +525,5 @@
 
     .TimelineItem {
         padding: 0 0 64px 42px;
-    }
-}
-
-/* Gallery Section */
-/* Full width gallery */
-.AboutGallery {
-    position: relative;
-    height: 520px;
-    width: 100vw;
-    left: 50%;
-    right: 50%;
-    margin-left: -50vw;
-    margin-right: -50vw;
-    padding: 0 0 0px;
-}
-
-.AboutGallery__viewport {
-    position: relative;
-    width: 100vw;
-    height: 100%;
-    border-radius: 40px;
-    overflow: hidden;
-}
-
-.AboutGallery .circular-gallery {
-    width: 100vw;
-    height: 100%;
-}
-
-@media (max-width:900px) {
-    .AboutGallery {
-        height: 480px;
-    }
-}
-
-@media (max-width:680px) {
-    .AboutGallery {
-        height: 420px;
-    }
-
-    .AboutGallery__viewport,
-    .AboutGallery .circular-gallery {
-        border-radius: 24px;
-    }
-}
-
-@media (max-width:520px) {
-    .AboutGallery {
-        height: 380px;
-    }
-
-    .AboutGallery__viewport,
-    .AboutGallery .circular-gallery {
-        border-radius: 12px;
     }
 }

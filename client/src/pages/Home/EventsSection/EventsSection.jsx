@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import CurvedLoop from '../../../components/CurvedLoop/CurvedLoop';
 import './EventsSection.css';
 
+// Memoized events data to prevent recreation
 const mockEvents = [
   { id: 'e1', title: 'Intro to Azure', date: 'Oct 15, 2025', time: '5:00 PM', img: '', action: 'Join' },
   { id: 'e2', title: 'AI Study Jam', date: 'Oct 18, 2025', time: '4:00 PM', img: '', action: 'Join' },
@@ -10,11 +11,21 @@ const mockEvents = [
   { id: 'e4', title: 'UI/UX Sprint', date: 'Oct 28, 2025', time: '2:00 PM', img: '', action: 'Join' }
 ];
 
-const EventsSection = () => {
+const EventsSection = memo(() => {
+  // Memoize animation props to prevent recreation
+  const initialAnimation = useMemo(() => ({ opacity: 0, y: 30 }), []);
+  const whileInViewAnimation = useMemo(() => ({ opacity: 1, y: 0 }), []);
+  const viewportProps = useMemo(() => ({ once: true, amount: 0.2 }), []);
+  const transitionProps = useMemo(() => ({ duration: .6, ease: 'easeOut' }), []);
+  const hoverAnimation = useMemo(() => ({ y: -10, boxShadow: '0 14px 40px -12px rgba(0,0,0,.65), 0 0 0 1px rgba(0,119,204,.5)' }), []);
+  
+  const buttonHoverAnimation = useMemo(() => ({ scale: 1.07 }), []);
+  const buttonTapAnimation = useMemo(() => ({ scale: .92 }), []);
+  const buttonTransition = useMemo(() => ({ type: 'spring', stiffness: 420, damping: 30 }), []);
+
   return (
     <section className="Events" aria-labelledby="events-heading">
       <div className="Events__head">
-        
         <CurvedLoop
           marqueeText="UPCOMING EVENTS ✦ SESSIONS ✦ INNOVATION ✦ COMMUNITY ✦ COLLABORATION ✦ GROWTH ✦"
           speed={1}
@@ -38,23 +49,32 @@ const EventsSection = () => {
           <motion.article
             key={ev.id}
             className="EventCard"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: .6, ease: 'easeOut' }}
-            whileHover={{ y: -10, boxShadow: '0 14px 40px -12px rgba(0,0,0,.65), 0 0 0 1px rgba(0,119,204,.5)' }}
+            initial={initialAnimation}
+            whileInView={whileInViewAnimation}
+            viewport={viewportProps}
+            transition={transitionProps}
+            whileHover={hoverAnimation}
           >
             <div className="EventCard__media" />
             <div className="EventCard__body">
               <h3 className="EventCard__title">{ev.title}</h3>
               <p className="EventCard__meta">{ev.date} • {ev.time}</p>
-              <motion.button className="EventCard__btn" whileHover={{ scale: 1.07 }} whileTap={{ scale: .92 }} transition={{ type: 'spring', stiffness: 420, damping: 30 }}>{ev.action}</motion.button>
+              <motion.button 
+                className="EventCard__btn" 
+                whileHover={buttonHoverAnimation} 
+                whileTap={buttonTapAnimation} 
+                transition={buttonTransition}
+              >
+                {ev.action}
+              </motion.button>
             </div>
           </motion.article>
         ))}
       </div>
     </section>
   );
-};
+});
+
+EventsSection.displayName = 'EventsSection';
 
 export default EventsSection;

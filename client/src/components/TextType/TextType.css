@@ -12,3 +12,13 @@
 .text-type__cursor--hidden {
   display: none;
 }
+
+/* CSS animation to replace GSAP cursor blinking */
+@keyframes cursorBlink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}

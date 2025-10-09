@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import TextType from '../../../components/TextType/TextType';
 import './HeroSection.css';
 
+// Memoized animation variants to prevent recreation
 const headingVariant = {
   hidden: { opacity: 0, y: 40 },
   visible: { opacity: 1, y: 0, transition: { duration: .9, ease: 'easeOut' } }
@@ -20,22 +21,34 @@ const ctaItem = {
   visible: { opacity: 1, y: 0, transition: { duration: .65, ease: 'easeOut' } }
 };
 
-export const HeroSection = () => {
+export const HeroSection = memo(() => {
+  // Memoize text array to prevent recreation
+  const heroTexts = useMemo(() => [
+    "Empowering Future Tech Leaders",
+    "Driving Innovation Through Technology",
+    "Building a Connected Community"
+  ], []);
+
+  // Memoize animation props to prevent recreation
+  const initialAnimation = useMemo(() => ({ opacity: 0, y: 20 }), []);
+  const animateAnimation = useMemo(() => ({ opacity: 1, y: 0 }), []);
+  const transitionAnimation = useMemo(() => ({ duration: 0.8, delay: 0.3 }), []);
+  
+  const hoverAnimation = useMemo(() => ({ scale: 1.06 }), []);
+  const tapAnimation = useMemo(() => ({ scale: .94 }), []);
+  const springTransition = useMemo(() => ({ type: 'spring', stiffness: 420, damping: 28 }), []);
+
   return (
     <section className="Hero" aria-labelledby="hero-heading">
       <div className="Hero__inner">
         <div className="Hero__col Hero__col--text">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
+            initial={initialAnimation}
+            animate={animateAnimation}
+            transition={transitionAnimation}
           >
             <TextType
-              text={[
-                "Empowering Future Tech Leaders",
-                "Driving Innovation Through Technology",
-                "Building a Connected Community"
-              ]}
+              text={heroTexts}
               typingSpeed={75}
               pauseDuration={1500}
               showCursor={true}
@@ -47,11 +60,11 @@ export const HeroSection = () => {
             MSP Tech Club is a community-driven hub fostering innovation, collaboration, and growth through technology, events, sessions, and real-world impact.
           </motion.p>
           <motion.div className="Hero__ctas" initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.6 }} variants={ctaVariant}>
-            <motion.a variants={ctaItem} href="/become-member" className="HeroCTA HeroCTA--primary" whileHover={{ scale: 1.06 }} whileTap={{ scale: .94 }} transition={{ type: 'spring', stiffness: 420, damping: 28 }}>Become a Member</motion.a>
-            <motion.a variants={ctaItem} href="/sessions" className="HeroCTA HeroCTA--ghost" whileHover={{ scale: 1.06 }} whileTap={{ scale: .94 }} transition={{ type: 'spring', stiffness: 420, damping: 28 }}>Explore Sessions</motion.a>
+            <motion.a variants={ctaItem} href="/become-member" className="HeroCTA HeroCTA--primary" whileHover={hoverAnimation} whileTap={tapAnimation} transition={springTransition}>Become a Member</motion.a>
+            <motion.a variants={ctaItem} href="/sessions" className="HeroCTA HeroCTA--ghost" whileHover={hoverAnimation} whileTap={tapAnimation} transition={springTransition}>Explore Sessions</motion.a>
           </motion.div>
         </div>
-        <div className="Hero__col Hero__col--model">
+        {/* <div className="Hero__col Hero__col--model">
           <motion.div className="Hero__modelWrap" initial={{ opacity: 0, scale: .85 }} whileInView={{ opacity: 1, scale: 1, transition: { duration: .9, ease: 'easeOut', delay: .25 } }} viewport={{ once: true, amount: 0.4 }}>
             <model-viewer 
               src="/src/assets/models3d/robotmsp2.glb" 
@@ -65,11 +78,13 @@ export const HeroSection = () => {
             ></model-viewer>
             <div className="Hero__glow" />
           </motion.div>
-        </div>
+        </div> */}
       </div>
       <div className="Hero__bg" aria-hidden="true" />
     </section>
   );
-};
+});
+
+HeroSection.displayName = 'HeroSection';
 
 export default HeroSection;

@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect, useRef, useState, createElement, useMemo, useCallback } from 'react';
-import { gsap } from 'gsap';
+import { useEffect, useRef, useState, createElement, useMemo, useCallback, memo } from 'react';
 import './TextType.css';
 
-const TextType = ({
+const TextType = memo(({
   text,
   as: Component = 'div',
   typingSpeed = 50,
@@ -41,10 +40,10 @@ const TextType = ({
     return Math.random() * (max - min) + min;
   }, [variableSpeed, typingSpeed]);
 
-  const getCurrentTextColor = () => {
+  const getCurrentTextColor = useCallback(() => {
     if (textColors.length === 0) return '#ffffff';
     return textColors[currentTextIndex % textColors.length];
-  };
+  }, [textColors, currentTextIndex]);
 
   useEffect(() => {
     if (!startOnVisible || !containerRef.current) return;
@@ -66,14 +65,8 @@ const TextType = ({
 
   useEffect(() => {
     if (showCursor && cursorRef.current) {
-      gsap.set(cursorRef.current, { opacity: 1 });
-      gsap.to(cursorRef.current, {
-        opacity: 0,
-        duration: cursorBlinkDuration,
-        repeat: -1,
-        yoyo: true,
-        ease: 'power2.inOut'
-      });
+      // Apply CSS animation class instead of GSAP
+      cursorRef.current.style.animation = `cursorBlink ${cursorBlinkDuration}s ease-in-out infinite`;
     }
   }, [showCursor, cursorBlinkDuration]);
 
@@ -146,8 +139,10 @@ const TextType = ({
     onSentenceComplete
   ]);
 
-  const shouldHideCursor =
-    hideCursorWhileTyping && (currentCharIndex < textArray[currentTextIndex].length || isDeleting);
+  const shouldHideCursor = useMemo(() =>
+    hideCursorWhileTyping && (currentCharIndex < textArray[currentTextIndex]?.length || isDeleting),
+    [hideCursorWhileTyping, currentCharIndex, textArray, currentTextIndex, isDeleting]
+  );
 
   return createElement(
     Component,
@@ -168,6 +163,8 @@ const TextType = ({
       </span>
     )
   );
-};
+});
+
+TextType.displayName = 'TextType';
 
 export default TextType;

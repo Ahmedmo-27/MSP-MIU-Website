@@ -1,7 +1,7 @@
-import { useRef, useEffect, useState, useMemo, useId } from 'react';
+import { useRef, useEffect, useState, useMemo, useId, memo, useCallback } from 'react';
 import './CurvedLoop.css';
 
-const CurvedLoop = ({
+const CurvedLoop = memo(({
   marqueeText = '',
   speed = 2,
   className,
@@ -71,15 +71,15 @@ const CurvedLoop = ({
     return () => cancelAnimationFrame(frame);
   }, [spacing, speed, ready]);
 
-  const onPointerDown = e => {
+  const onPointerDown = useCallback(e => {
     if (!interactive) return;
     dragRef.current = true;
     lastXRef.current = e.clientX;
     velRef.current = 0;
     e.target.setPointerCapture(e.pointerId);
-  };
+  }, [interactive]);
 
-  const onPointerMove = e => {
+  const onPointerMove = useCallback(e => {
     if (!interactive || !dragRef.current || !textPathRef.current) return;
     const dx = e.clientX - lastXRef.current;
     lastXRef.current = e.clientX;
@@ -94,15 +94,18 @@ const CurvedLoop = ({
 
     textPathRef.current.setAttribute('startOffset', newOffset + 'px');
     setOffset(newOffset);
-  };
+  }, [interactive, spacing]);
 
-  const endDrag = () => {
+  const endDrag = useCallback(() => {
     if (!interactive) return;
     dragRef.current = false;
     dirRef.current = velRef.current > 0 ? 'right' : 'left';
-  };
+  }, [interactive]);
 
-  const cursorStyle = interactive ? (dragRef.current ? 'grabbing' : 'grab') : 'auto';
+  const cursorStyle = useMemo(() => 
+    interactive ? (dragRef.current ? 'grabbing' : 'grab') : 'auto', 
+    [interactive]
+  );
 
   return (
     <div
@@ -130,6 +133,8 @@ const CurvedLoop = ({
       </svg>
     </div>
   );
-};
+});
+
+CurvedLoop.displayName = 'CurvedLoop';
 
 export default CurvedLoop;

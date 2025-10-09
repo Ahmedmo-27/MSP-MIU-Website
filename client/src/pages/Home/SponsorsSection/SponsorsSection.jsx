@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import './SponsorsSection.css';
-import Cubes from '../../../components/Cubes/Cubes';
 
+// Memoized data arrays to prevent recreation
 const sponsors = [
     { id: 's1', name: 'Microsoft', logo: '', url: '#' },
     { id: 's2', name: 'Azure', logo: '', url: '#' },
@@ -16,21 +16,22 @@ const counters = [
     { id: 'c3', label: 'Projects', value: 24 }
 ];
 
-const SponsorsSection = () => {
+const SponsorsSection = memo(() => {
+    // Memoize animation props to prevent recreation
+    const sponsorHoverAnimation = useMemo(() => ({ scale: 1.08, filter: 'grayscale(0) brightness(1.15)' }), []);
+    const sponsorInitialAnimation = useMemo(() => ({ opacity: 0, y: 24 }), []);
+    const sponsorWhileInViewAnimation = useMemo(() => ({ opacity: 1, y: 0 }), []);
+    const sponsorViewportProps = useMemo(() => ({ once: true, amount: 0.25 }), []);
+    const sponsorTransition = useMemo(() => ({ type: 'spring', stiffness: 420, damping: 32 }), []);
+    
+    const counterInitialAnimation = useMemo(() => ({ opacity: 0, y: 18 }), []);
+    const counterWhileInViewAnimation = useMemo(() => ({ opacity: 1, y: 0 }), []);
+    const counterViewportProps = useMemo(() => ({ once: true, amount: 0.3 }), []);
+    const counterTransition = useMemo(() => ({ duration: .6, ease: 'easeOut' }), []);
+    const counterHoverAnimation = useMemo(() => ({ y: -6, boxShadow: '0 12px 34px -10px rgba(0,0,0,.6), 0 0 0 1px rgba(0,119,204,.4)' }), []);
+
     return (
         <section className="Sponsors" aria-labelledby="sponsors-heading">
-            <div className="Sponsors__bg" aria-hidden="true">
-                <Cubes
-                    gridSize={11}
-                    cubeSize={undefined}
-                    maxAngle={35}
-                    radius={3}
-                    autoAnimate={true}
-                    rippleOnClick={false}
-                    faceColor="#060010"
-                    borderStyle="2.5px dashed rgba(72, 169, 254, 0.55)"
-                />
-            </div>
             <div className="Sponsors__head"><h2 id="sponsors-heading" className="Sponsors__title">Our Partners & Milestones</h2></div>
             <div className="Sponsors__grid">
                 {sponsors.map(s => (
@@ -38,11 +39,11 @@ const SponsorsSection = () => {
                         key={s.id}
                         href={s.url}
                         className="SponsorLogo"
-                        whileHover={{ scale: 1.08, filter: 'grayscale(0) brightness(1.15)' }}
-                        initial={{ opacity: 0, y: 24 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true, amount: 0.25 }}
-                        transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                        whileHover={sponsorHoverAnimation}
+                        initial={sponsorInitialAnimation}
+                        whileInView={sponsorWhileInViewAnimation}
+                        viewport={sponsorViewportProps}
+                        transition={sponsorTransition}
                     >
                         <div className="SponsorLogo__img" data-name={s.name}>{s.logo || s.name}</div>
                     </motion.a>
@@ -53,11 +54,11 @@ const SponsorsSection = () => {
                     <motion.div
                         key={c.id}
                         className="Counter"
-                        initial={{ opacity: 0, y: 18 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true, amount: 0.3 }}
-                        transition={{ duration: .6, ease: 'easeOut' }}
-                        whileHover={{ y: -6, boxShadow: '0 12px 34px -10px rgba(0,0,0,.6), 0 0 0 1px rgba(0,119,204,.4)' }}
+                        initial={counterInitialAnimation}
+                        whileInView={counterWhileInViewAnimation}
+                        viewport={counterViewportProps}
+                        transition={counterTransition}
+                        whileHover={counterHoverAnimation}
                     >
                         <div className="Counter__value" data-target={c.value}>{c.value}+</div>
                         <div className="Counter__label">{c.label}</div>
@@ -66,6 +67,8 @@ const SponsorsSection = () => {
             </div>
         </section>
     );
-};
+});
+
+SponsorsSection.displayName = 'SponsorsSection';
 
 export default SponsorsSection;

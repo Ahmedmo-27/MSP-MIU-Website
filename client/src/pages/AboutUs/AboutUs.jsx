@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import './AboutUs.css';
-import CircularGallery from '../../components/CircularGallery/CircularGallery';
 import { FiTarget, FiEye, FiHeart, FiUsers, FiCpu, FiArrowRight } from 'react-icons/fi';
 import { FaMicrosoft, FaRocket, FaTrophy, FaCode, FaHandshake, FaUserPlus } from 'react-icons/fa';
 import { MdLightbulbOutline, MdStar } from 'react-icons/md';
 
+// Memoized animation variants
 const heroParent = {
   hidden: { opacity: 0 },
   show: { opacity: 1, transition: { staggerChildren: 0.15 } }
@@ -16,6 +16,7 @@ const fadeUp = {
 };
 const cardWhileHover = { scale: 1.045, boxShadow: '0 10px 40px -10px rgba(0,0,0,.7), 0 0 0 1px rgba(0,160,255,.35)' };
 
+// Memoized data arrays
 const missionValues = [
   {
     id: 'm1',
@@ -47,7 +48,7 @@ const milestones = [
   { id: 't7', year: '2024', title: 'Innovation Acceleration', icon: <FaRocket />, body: 'Scaled partner collaborations, deepened Azure adoption, and showcased student solutions.' }
 ];
 
-const AboutUs = () => {
+const AboutUs = memo(() => {
   return (
     <main className="About">
       <section className="AboutHero" aria-labelledby="about-hero-heading">
@@ -58,28 +59,6 @@ const AboutUs = () => {
         </motion.div>
       </section>
 
-      <section className="AboutGallery" aria-label="Showcase Gallery">
-        <div className="GalleryBg" aria-hidden="true" />
-        <div className="AboutGallery__viewport">
-          <CircularGallery
-            bend={-3}
-            borderRadius={0.08}
-            textColor="#8EC2F0"
-            scrollSpeed={2.4}
-            scrollEase={0.36}
-            itemBaseWidth={860}
-            itemBaseHeight={840}
-            items={[
-              { image: 'https://picsum.photos/seed/a1/800/600?grayscale', text: 'Placeholder One' },
-              { image: 'https://picsum.photos/seed/a6/800/600?grayscale', text: 'Placeholder Two' },
-              { image: 'https://picsum.photos/seed/a3/800/600?grayscale', text: 'Placeholder Three' },
-              { image: 'https://picsum.photos/seed/a4/800/600?grayscale', text: 'Placeholder Four' },
-              { image: 'https://picsum.photos/seed/a5/800/600?grayscale', text: 'Placeholder Five' },
-              { image: 'https://picsum.photos/seed/a6/800/600?grayscale', text: 'Placeholder Six' }
-            ]}
-          />
-        </div>
-      </section>
 
       <section className="AboutTriad" aria-label="Mission Vision Values">
         <div className="AboutTriad__grid">
@@ -146,6 +125,8 @@ const AboutUs = () => {
       </section>
     </main>
   );
-};
+});
+
+AboutUs.displayName = 'AboutUs';
 
 export default AboutUs;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { NavLink } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,6 +10,7 @@ import './Navbar.css';
 
 import mspLogo from '../../assets/Images/msp-logo.png';
 
+// Memoized links array to prevent recreation
 const links = [
   { to: '/', label: 'Home', icon: <FaHome /> },
   { to: '/about', label: 'About Us', icon: <MdGroups /> },
@@ -24,6 +25,7 @@ const links = [
   { to: '/sponsors', label: 'Sponsors', icon: <FaHandshake /> }
 ];
 
+// Memoized animation variants
 const navMotion = {
   hidden: { opacity: 0, y: -20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: 'easeOut', staggerChildren: 0.035 } }
@@ -33,19 +35,25 @@ const itemMotion = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } }
 };
 
-const Navbar = () => {
+const Navbar = memo(() => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
+  // Memoized scroll handler
+  const handleScroll = useCallback(() => {
+    setScrolled(window.scrollY > 10);
   }, []);
 
-  useEffect(() => { document.body.style.overflow = mobileOpen ? 'hidden' : ''; }, [mobileOpen]);
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
 
-  const closeMobile = () => setMobileOpen(false);
+  useEffect(() => { 
+    document.body.style.overflow = mobileOpen ? 'hidden' : ''; 
+  }, [mobileOpen]);
+
+  const closeMobile = useCallback(() => setMobileOpen(false), []);
 
   return (
     <header className={`Navbar Navbar--flat ${scrolled ? 'Navbar--scrolled' : ''}`}>      
@@ -140,7 +148,9 @@ const Navbar = () => {
       )}
     </header>
   );
-};
+});
+
+Navbar.displayName = 'Navbar';
 
 export { Navbar };
 export default Navbar;
