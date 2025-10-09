@@ -137,6 +137,38 @@ const updateApplicationStatus = async (req, res) => {
     }
 };
 
+// Update application comment
+const updateApplicationComment = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { comment } = req.body;
+
+        const application = await Application.findByPk(id);
+
+        if (!application) {
+            return res.status(404).json({
+                success: false,
+                error: 'Application not found'
+            });
+        }
+
+        await application.update({ comment });
+
+        res.json({
+            success: true,
+            message: 'Comment updated successfully',
+            data: { application_id: id, comment }
+        });
+
+    } catch (error) {
+        console.error('Error updating application comment:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error'
+        });
+    }
+};
+
 // Delete application
 const deleteApplication = async (req, res) => {
     try {
@@ -170,5 +202,6 @@ module.exports = {
     createApplication,
     getAllApplications,
     updateApplicationStatus,
+    updateApplicationComment,
     deleteApplication
 };
