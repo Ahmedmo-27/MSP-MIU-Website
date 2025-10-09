@@ -32,9 +32,21 @@ class ApiService {
   }
 
 
-  static async getAllApplications() {
+  static async getAllApplications(filters = {}) {
     try {
-      const response = await fetch(`${API_BASE_URL}/applications`);
+      // Build query string from filters
+      const queryParams = new URLSearchParams();
+      
+      Object.keys(filters).forEach(key => {
+        if (filters[key] !== null && filters[key] !== undefined && filters[key] !== '') {
+          queryParams.append(key, filters[key]);
+        }
+      });
+      
+      const queryString = queryParams.toString();
+      const url = queryString ? `${API_BASE_URL}/applications?${queryString}` : `${API_BASE_URL}/applications`;
+      
+      const response = await fetch(url);
       const result = await response.json();
       
       if (!response.ok) {
@@ -48,14 +60,14 @@ class ApiService {
     }
   }
 
-  static async updateApplicationStatus(id, status) {
+  static async updateApplicationStatus(id, status, password = null) {
     try {
       const response = await fetch(`${API_BASE_URL}/applications/${id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status, password }),
       });
 
       const result = await response.json();
