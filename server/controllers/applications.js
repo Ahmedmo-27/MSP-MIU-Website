@@ -84,14 +84,76 @@ const createApplication = async (req, res) => {
 
 const getAllApplications = async (req, res) => {
     try {
-        const applications = await Application.findAll({
+        // Extract query parameters for filtering
+        const { 
+            first_choice, 
+            second_choice, 
+            status, 
+            faculty, 
+            year,
+            search 
+        } = req.query;
+
+        // Build where clause for filtering
+        const whereClause = {};
+        
+        if (first_choice) {
+            whereClause.first_choice = first_choice;
+        }
+        
+        if (second_choice) {
+            whereClause.second_choice = second_choice;
+        }
+        
+        if (status) {
+            whereClause.status = status;
+        }
+        
+        if (faculty) {
+            whereClause.faculty = faculty;
+        }
+        
+        if (year) {
+            whereClause.year = parseInt(year);
+        }
+
+        // Build the query options
+        const queryOptions = {
+            where: whereClause,
             order: [['application_id', 'DESC']]
-        });
+        };
+
+        // Add text search if provided
+        if (search) {
+            const { Op } = require('sequelize');
+            queryOptions.where = {
+                ...whereClause,
+                [Op.or]: [
+                    { university_id: { [Op.like]: `%${search}%` } },
+                    { full_name: { [Op.like]: `%${search}%` } },
+                    { email: { [Op.like]: `%${search}%` } },
+                    { phone_number: { [Op.like]: `%${search}%` } },
+                    { skills: { [Op.like]: `%${search}%` } },
+                    { motivation: { [Op.like]: `%${search}%` } }
+                    // Note: Comment field excluded from search
+                ]
+            };
+        }
+
+        const applications = await Application.findAll(queryOptions);
 
         res.json({
             success: true,
             data: applications,
-            count: applications.length
+            count: applications.length,
+            filters: {
+                first_choice,
+                second_choice,
+                status,
+                faculty,
+                year,
+                search
+            }
         });
     } catch (error) {
         console.error('Error fetching applications:', error);
@@ -109,7 +171,7 @@ const getAllApplications = async (req, res) => {
 const updateApplicationStatus = async (req, res) => {
     try {
         const { id } = req.params;
-        const { status } = req.body;
+        const { status, password } = req.body;
 
         const application = await Application.findByPk(id);
 
@@ -117,6 +179,21 @@ const updateApplicationStatus = async (req, res) => {
             return res.status(404).json({
                 success: false,
                 error: 'Application not found'
+            });
+        }
+
+        // Check password for any status change
+        if (!password) {
+            return res.status(400).json({
+                success: false,
+                error: 'Password required for status change'
+            });
+        }
+
+        if (password !== 'الرجل العناب') {
+            return res.status(401).json({
+                success: false,
+                error: 'Incorrect password'
             });
         }
 
