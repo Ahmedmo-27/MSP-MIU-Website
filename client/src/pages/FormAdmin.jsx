@@ -167,14 +167,12 @@ const FormAdmin = () => {
 
   // Function to get status color
   const getStatusColor = (status) => {
-    switch (status) {
-      case 'approved':
-        return '#27ae60'; // Green color from the palette
-      case 'rejected':
-        return '#e74c3c'; // Red color from the palette
-      case 'pending':
-      default:
-        return '#395a7f'; // Default blue color from the palette
+    if (status?.startsWith('approved')) {
+      return '#27ae60'; // Green color from the palette
+    } else if (status?.startsWith('rejected')) {
+      return '#e74c3c'; // Red color from the palette
+    } else {
+      return '#395a7f'; // Default blue color from the palette
     }
   };
 

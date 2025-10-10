@@ -190,7 +190,7 @@ const updateApplicationStatus = async (req, res) => {
             });
         }
 
-        if (password !== 'الرجل العناب' || password !== 'el ragol el 3enab') {
+        if (password !== 'الرجل العناب' && password !== 'el_ragol_el_3enab') {
             return res.status(401).json({
                 success: false,
                 error: 'Incorrect password'
