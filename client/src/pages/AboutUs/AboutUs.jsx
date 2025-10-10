@@ -80,7 +80,7 @@ const AboutUs = memo(() => {
           <h2 id="about-meaning-heading" className="AboutMeaning__title">What MSP Stands For</h2>
         </header>
         <motion.div className="AboutMeaning__content" initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, ease: 'easeOut' }}>
-          <p className="AboutMeaning__text">MSP stands for <span className="hi">Microsoft Learn Student Ambassadors</span> — a global program connecting passionate student technologists with resources, mentorship, and pathways to impact. At MIU, our MSP Tech Club activates this mission through hands‑on sessions, workshops, hackathons, peer mentoring, and community solution building.</p>
+          <p className="AboutMeaning__text">MSP stands for <span className="hi">Microsoft Student Partners </span>led by Microsoft Learn Student Ambassadors — a global program connecting passionate student technologists with resources, mentorship, and pathways to impact. At MIU, our MSP Tech Club activates this mission through hands‑on sessions, workshops, hackathons, peer mentoring, and community solution building.</p>
           <p className="AboutMeaning__text">We focus on practical exploration across cloud, AI, developer tooling, productivity, and emerging experiences. Members grow by <span className="hi">learning</span>, <span className="hi">building</span>, <span className="hi">sharing</span>, and <span className="hi">leading</span>.</p>
           <ul className="AboutMeaning__iconList" aria-label="Focus Areas">
             <motion.li whileHover={{ scale: 1.08 }}><FaMicrosoft /> Program Alignment</motion.li>
@@ -91,7 +91,7 @@ const AboutUs = memo(() => {
         </motion.div>
       </section>
 
-      <section className="AboutTimeline" aria-labelledby="about-timeline-heading">
+      {/* <section className="AboutTimeline" aria-labelledby="about-timeline-heading">
         <header className="AboutTimeline__head">
           <h2 id="about-timeline-heading" className="AboutTimeline__title">MSP-MIU Milestones</h2>
         </header>
@@ -110,7 +110,7 @@ const AboutUs = memo(() => {
             </motion.div>
           ))}
         </div>
-      </section>
+      </section> */}
 
       <section className="AboutCTA" aria-labelledby="about-cta-heading">
         <div className="AboutCTA__glow" aria-hidden="true" />

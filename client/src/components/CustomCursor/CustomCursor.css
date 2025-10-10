@@ -12,9 +12,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: width .28s cubic-bezier(.19,1,.22,1), height .28s cubic-bezier(.19,1,.22,1), filter .35s ease, box-shadow .35s ease;
-  will-change: transform, width, height, filter;
+  /* Optimized transitions using transform instead of width/height */
+  transition: transform .28s cubic-bezier(.19,1,.22,1), filter .35s ease;
+  will-change: transform, filter;
   filter: drop-shadow(0 0 6px rgba(0,119,204,.55)) drop-shadow(0 0 18px rgba(3,169,244,.35));
+  /* Use transform for better performance */
+  transform: translate3d(0, 0, 0);
 }
 
 .CustomCursor__core {
@@ -24,12 +27,13 @@
   background: radial-gradient(circle at 35% 35%, rgba(3,169,244,.45), rgba(0,119,204,.15) 55%, rgba(0,119,204,0) 70%);
   border: 2px solid rgba(3,169,244,.65);
   box-shadow: 0 0 0 1px rgba(0,119,204,.35), 0 0 22px 8px rgba(0,119,204,.35), 0 0 46px 18px rgba(3,169,244,.25);
-  animation: cursorPulse 3.2s ease-in-out infinite;
+  animation: cursorPulse 4.5s ease-in-out infinite; /* Slower animation for better performance */
   backdrop-filter: blur(4px) saturate(160%);
 }
 
 .CustomCursor.is-active { 
-  width: 70px; height: 70px; 
+  /* Use transform scale instead of width/height for better performance */
+  transform: scale(1.59); /* 70/44 = 1.59 */
   filter: drop-shadow(0 0 10px rgba(3,169,244,.75)) drop-shadow(0 0 32px rgba(3,169,244,.55));
 }
 
@@ -40,8 +44,14 @@
 }
 
 @keyframes cursorPulse {
-  0%, 100% { transform: scale(1); opacity: .95; }
-  50% { transform: scale(.9); opacity: .82; }
+  0%, 100% { 
+    transform: scale(1); 
+    opacity: .95; 
+  }
+  50% { 
+    transform: scale(.95); /* Reduced scale change for smoother performance */
+    opacity: .88; /* Less opacity change */
+  }
 }
 
 @media (max-width: 780px) {

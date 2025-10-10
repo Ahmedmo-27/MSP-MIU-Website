@@ -6,23 +6,35 @@ import './CustomCursor.css';
 const CustomCursor = memo(() => {
   const [active, setActive] = useState(false);
   const [isDesktop, setIsDesktop] = useState(true); // Start with true to avoid flicker
+  const [isVisible, setIsVisible] = useState(true); // Track page visibility
   const x = useMotionValue(-100);
   const y = useMotionValue(-100);
 
-  // Spring for smooth interpolation
-  const springX = useSpring(x, { stiffness: 380, damping: 32, mass: 0.6 });
-  const springY = useSpring(y, { stiffness: 380, damping: 32, mass: 0.6 });
+  // Reduced spring stiffness for smoother performance
+  const springX = useSpring(x, { stiffness: 180, damping: 25, mass: 0.8 });
+  const springY = useSpring(y, { stiffness: 180, damping: 25, mass: 0.8 });
 
-  // Memoized event handlers
+  // Memoized event handlers with visibility check
   const move = useCallback((e) => {
-    x.set(e.clientX);
-    y.set(e.clientY);
-  }, [x, y]);
+    // Only update position if page is visible for better performance
+    if (isVisible) {
+      x.set(e.clientX);
+      y.set(e.clientY);
+    }
+  }, [x, y, isVisible]);
 
   const activate = useCallback(() => setActive(true), []);
   const deactivate = useCallback(() => setActive(false), []);
 
   useEffect(() => {
+    // Visibility detection for performance optimization
+    const handleVisibilityChange = () => {
+      setIsVisible(!document.hidden);
+    };
+
+    // Page visibility API for performance optimization
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
     // Check if device supports mouse (desktop)
     const checkIsDesktop = () => {
       // Simplified desktop detection - if screen is wide enough, assume desktop
@@ -42,10 +54,10 @@ const CustomCursor = memo(() => {
     const handleResize = () => checkIsDesktop();
     window.addEventListener('resize', handleResize);
     
-    // Throttle mousemove events for better performance
+    // Enhanced throttling with visibility check for better performance
     let ticking = false;
     const throttledMove = (e) => {
-      if (!ticking && isDesktop) {
+      if (!ticking && isDesktop && isVisible) {
         requestAnimationFrame(() => {
           move(e);
           ticking = false;
@@ -73,6 +85,7 @@ const CustomCursor = memo(() => {
 
     return () => {
       // Cleanup event listeners
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('mousemove', throttledMove);
       window.removeEventListener('resize', handleResize);
       observer.disconnect();
@@ -81,15 +94,12 @@ const CustomCursor = memo(() => {
         el.removeEventListener('mouseleave', deactivate);
       });
     };
-  }, [move, activate, deactivate]);
+  }, [move, activate, deactivate, isVisible]);
 
   // Only render custom cursor on desktop devices
   if (!isDesktop) {
-    console.log('CustomCursor: Not rendering - not desktop device');
     return null;
   }
-
-  console.log('CustomCursor: Rendering custom cursor');
 
   return (
     <motion.div
