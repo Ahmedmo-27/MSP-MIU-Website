@@ -5,7 +5,7 @@ import './CustomCursor.css';
 // Functional component implementing a smooth, animated custom cursor
 const CustomCursor = memo(() => {
   const [active, setActive] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(true); // Start with true to avoid flicker
   const x = useMotionValue(-100);
   const y = useMotionValue(-100);
 
@@ -25,20 +25,15 @@ const CustomCursor = memo(() => {
   useEffect(() => {
     // Check if device supports mouse (desktop)
     const checkIsDesktop = () => {
-      const isDesktopDevice = window.matchMedia('(min-width: 781px)').matches && 
-                             window.matchMedia('(hover: hover)').matches;
+      // Simplified desktop detection - if screen is wide enough, assume desktop
+      const isWideScreen = window.innerWidth >= 781;
+      const hasHover = window.matchMedia('(hover: hover)').matches;
+      
+      // Show cursor on wide screens or if hover is supported
+      const isDesktopDevice = isWideScreen || hasHover;
       setIsDesktop(isDesktopDevice);
       
-      if (isDesktopDevice) {
-        // Hide default cursor on desktop
-        document.body.style.cursor = 'none';
-        // Also ensure all elements have cursor none
-        document.documentElement.style.cursor = 'none';
-      } else {
-        // Restore default cursor on mobile
-        document.body.style.cursor = 'auto';
-        document.documentElement.style.cursor = 'auto';
-      }
+      // Cursor hiding is handled by CSS media queries in styles.css
     };
     
     checkIsDesktop();
@@ -77,10 +72,7 @@ const CustomCursor = memo(() => {
     observer.observe(document.body, { childList: true, subtree: true });
 
     return () => {
-      // Restore default cursor on unmount
-      document.body.style.cursor = 'auto';
-      document.documentElement.style.cursor = 'auto';
-      
+      // Cleanup event listeners
       window.removeEventListener('mousemove', throttledMove);
       window.removeEventListener('resize', handleResize);
       observer.disconnect();
@@ -93,8 +85,11 @@ const CustomCursor = memo(() => {
 
   // Only render custom cursor on desktop devices
   if (!isDesktop) {
+    console.log('CustomCursor: Not rendering - not desktop device');
     return null;
   }
+
+  console.log('CustomCursor: Rendering custom cursor');
 
   return (
     <motion.div

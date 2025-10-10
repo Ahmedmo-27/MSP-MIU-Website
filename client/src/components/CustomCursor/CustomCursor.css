@@ -1,12 +1,4 @@
-/* Hide default cursor globally */
-* {
-  cursor: none !important;
-}
-
-/* Ensure custom cursor is visible */
-html, body {
-  cursor: none !important;
-}
+/* Cursor hiding is now handled by main styles.css with media queries */
 
 .CustomCursor { 
   position: fixed;
@@ -54,9 +46,4 @@ html, body {
 
 @media (max-width: 780px) {
   .CustomCursor { display: none; }
-  
-  /* Restore default cursor on mobile */
-  *, html, body {
-    cursor: auto !important;
-  }
 }

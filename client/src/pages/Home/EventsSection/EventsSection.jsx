@@ -1,6 +1,5 @@
 import React, { memo, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import CurvedLoop from '../../../components/CurvedLoop/CurvedLoop';
 import './EventsSection.css';
 
 // Memoized events data to prevent recreation
@@ -26,22 +25,6 @@ const EventsSection = memo(() => {
   return (
     <section className="Events" aria-labelledby="events-heading">
       <div className="Events__head">
-        <CurvedLoop
-          marqueeText="UPCOMING EVENTS ✦ SESSIONS ✦ INNOVATION ✦ COMMUNITY ✦ COLLABORATION ✦ GROWTH ✦"
-          speed={1}
-          curveAmount={30}
-          direction="right"
-          interactive={true}
-          className="Events__marquee Events__marquee--cyan"
-        />
-        <CurvedLoop
-          marqueeText="LEARN ✦ BUILD ✦ SHARE ✦ LEAD ✦ CREATE ✦ NETWORK ✦ ACHIEVE ✦ IMPACT ✦"
-          speed={1}
-          curveAmount={30}
-          direction="left"
-          interactive={true}
-          className="Events__marquee Events__marquee--orange"
-        />
         <h2 id="events-heading" className="Events__title">Latest Sessions & Events</h2>
       </div>
       <div className="Events__grid">

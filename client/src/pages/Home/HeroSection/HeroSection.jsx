@@ -1,6 +1,7 @@
 import React, { memo, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import TextType from '../../../components/TextType/TextType';
+import mspLogo from '../../../assets/Images/msp-logo.png';
 import './HeroSection.css';
 
 // Memoized animation variants to prevent recreation
@@ -64,21 +65,77 @@ export const HeroSection = memo(() => {
             <motion.a variants={ctaItem} href="/sessions" className="HeroCTA HeroCTA--ghost" whileHover={hoverAnimation} whileTap={tapAnimation} transition={springTransition}>Explore Sessions</motion.a>
           </motion.div>
         </div>
-        {/* <div className="Hero__col Hero__col--model">
-          <motion.div className="Hero__modelWrap" initial={{ opacity: 0, scale: .85 }} whileInView={{ opacity: 1, scale: 1, transition: { duration: .9, ease: 'easeOut', delay: .25 } }} viewport={{ once: true, amount: 0.4 }}>
-            <model-viewer 
-              src="/src/assets/models3d/robotmsp2.glb" 
-              alt="MSP 3D Logo Model"
-              auto-rotate
-              camera-controls
-              shadow-intensity="1"
-              exposure="1"
-              loading="lazy"
-              class="Hero__model"
-            ></model-viewer>
-            <div className="Hero__glow" />
+        <div className="Hero__col Hero__col--logo">
+          <motion.div 
+            className="Hero__logoWrap" 
+            initial={{ opacity: 0, scale: .85 }} 
+            whileInView={{ opacity: 1, scale: 1, transition: { duration: .9, ease: 'easeOut', delay: .25 } }} 
+            viewport={{ once: true, amount: 0.4 }}
+          >
+            <motion.div 
+              className="Hero__logoContainer"
+              animate={{ 
+                rotate: [0, 5, -5, 0],
+                scale: [1, 1.05, 1]
+              }}
+              transition={{ 
+                duration: 8, 
+                repeat: Infinity, 
+                ease: "easeInOut" 
+              }}
+            >
+              <img 
+                src={mspLogo} 
+                alt="MSP Tech Club Logo" 
+                className="Hero__logo"
+              />
+            </motion.div>
+            
+            {/* Floating decorative elements */}
+            <motion.div 
+              className="Hero__float Hero__float--1"
+              animate={{ 
+                y: [0, -20, 0],
+                opacity: [0.6, 1, 0.6]
+              }}
+              transition={{ 
+                duration: 3, 
+                repeat: Infinity, 
+                ease: "easeInOut",
+                delay: 0
+              }}
+            />
+            <motion.div 
+              className="Hero__float Hero__float--2"
+              animate={{ 
+                y: [0, -15, 0],
+                opacity: [0.4, 0.8, 0.4]
+              }}
+              transition={{ 
+                duration: 4, 
+                repeat: Infinity, 
+                ease: "easeInOut",
+                delay: 1
+              }}
+            />
+            <motion.div 
+              className="Hero__float Hero__float--3"
+              animate={{ 
+                y: [0, -25, 0],
+                opacity: [0.5, 0.9, 0.5]
+              }}
+              transition={{ 
+                duration: 5, 
+                repeat: Infinity, 
+                ease: "easeInOut",
+                delay: 2
+              }}
+            />
+            
+            {/* Glowing background effect */}
+            <div className="Hero__glow Hero__glow--logo" />
           </motion.div>
-        </div> */}
+        </div>
       </div>
       <div className="Hero__bg" aria-hidden="true" />
     </section>

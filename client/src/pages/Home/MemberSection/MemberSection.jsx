@@ -25,9 +25,6 @@ const MemberSection = memo(({ isMember = false }) => {
   // Memoize animation props to prevent recreation
   const cardHoverAnimation = useMemo(() => ({ y: -8 }), []);
   const cardTransition = useMemo(() => ({ type: 'spring', stiffness: 380, damping: 28 }), []);
-  
-  const bellAnimation = useMemo(() => ({ scale: [1, 1.15, 1], rotate: [0, 8, -6, 0] }), []);
-  const bellTransition = useMemo(() => ({ repeat: Infinity, duration: 4, ease: 'easeInOut' }), []);
 
   return (
     <section className="MemberDash" aria-labelledby="member-dash-heading">
@@ -48,7 +45,7 @@ const MemberSection = memo(({ isMember = false }) => {
         <motion.div className="DashCard" whileHover={cardHoverAnimation} transition={cardTransition}>
           <div className="DashCard__titleWrap">
             <h3 className="DashCard__title">Notifications</h3>
-            <motion.div className="Bell" animate={bellAnimation} transition={bellTransition}>
+            <motion.div className="Bell">
               <span className="Bell__icon">🔔</span>
               <span className="Bell__badge">{notifications.length}</span>
               <div className="Bell__dropdown">
