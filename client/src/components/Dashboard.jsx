@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef, useMemo, memo } from "react";
+import { useNavigate } from "react-router-dom";
 import ApiService from "../services/api";
 import { getDepartmentNameById } from "../data/departments";
 
@@ -138,6 +139,7 @@ const CommentModal = memo(({ commentModal, setCommentModal, closeCommentModal, s
 CommentModal.displayName = 'CommentModal';
 
 const Dashboard = memo(() => {
+  const navigate = useNavigate();
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -428,6 +430,12 @@ const Dashboard = memo(() => {
   };
 
   useEffect(() => {
+    // Check if user is authenticated
+    if (!ApiService.isAuthenticated()) {
+      navigate('/login');
+      return;
+    }
+
     const fetchApplications = async () => {
       try {
         const result = await ApiService.getAllApplications();
@@ -437,12 +445,20 @@ const Dashboard = memo(() => {
         setLoading(false);
       } catch (err) {
         console.error("Error fetching applications:", err);
+        
+        // If unauthorized, redirect to login
+        if (err.message.includes('Unauthorized') || err.message.includes('401')) {
+          ApiService.removeAuthToken();
+          navigate('/login');
+          return;
+        }
+        
         setLoading(false);
       }
     };
 
     fetchApplications();
-  }, []);
+  }, [navigate]);
 
   // Debounced search function
   const debouncedSearch = useCallback(
@@ -517,6 +533,18 @@ const Dashboard = memo(() => {
     }
   };
 
+  // Handle logout
+  const handleLogout = useCallback(async () => {
+    try {
+      await ApiService.logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Force logout even if API call fails
+      navigate('/login');
+    }
+  }, [navigate]);
+
   if (loading) return <p>Loading applications...</p>;
 
   return (
@@ -529,7 +557,23 @@ const Dashboard = memo(() => {
         saveComment={saveComment}
         textareaRef={textareaRef}
       />
-      <h2>Applications Dashboard</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <h2>Applications Dashboard</h2>
+        <button
+          onClick={handleLogout}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: '#e74c3c',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: '14px'
+          }}
+        >
+          Logout
+        </button>
+      </div>
       
       {/* Charts Section */}
       <div style={{ 

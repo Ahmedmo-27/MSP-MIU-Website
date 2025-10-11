@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { createPortal } from 'react-dom';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FaHome, FaUsers, FaUserPlus, FaSignInAlt, FaDumbbell, FaChalkboardTeacher, FaCalendarAlt, FaLightbulb, FaTrophy, FaHandshake
 } from 'react-icons/fa';
 import { MdGroups } from 'react-icons/md';
 import './Navbar.css';
+import LoginCard from '../../components/LoginCard';
 
 import mspLogo from '../../assets/Images/msp-logo.png';
 
@@ -38,6 +39,8 @@ const itemMotion = {
 const Navbar = memo(() => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [showLoginCard, setShowLoginCard] = useState(false);
+  const location = useLocation();
 
   // Memoized scroll handler
   const handleScroll = useCallback(() => {
@@ -54,6 +57,15 @@ const Navbar = memo(() => {
   }, [mobileOpen]);
 
   const closeMobile = useCallback(() => setMobileOpen(false), []);
+  
+  // Handle login button click - show login overlay
+  const handleLoginClick = useCallback((e) => {
+    e.preventDefault();
+    setShowLoginCard(true);
+    setMobileOpen(false); // Close mobile menu if open
+  }, []);
+  
+  const closeLoginCard = useCallback(() => setShowLoginCard(false), []);
 
   return (
     <header className={`Navbar Navbar--flat ${scrolled ? 'Navbar--scrolled' : ''}`}>      
@@ -79,23 +91,42 @@ const Navbar = memo(() => {
         <motion.ul className="Navbar__links" variants={navMotion} initial="hidden" animate="visible">
           {links.map(l => (
             <motion.li key={l.to} variants={itemMotion} whileHover={{ y: -2 }} transition={{ type: 'spring', stiffness: 400, damping: 26 }}>
-              <NavLink
-                to={l.to}
-                onClick={closeMobile}
-                className={({ isActive }) => `NavItem ${isActive ? 'is-active' : ''}`}
-              >
-                <motion.span className="NavItem__icon" whileHover={{ scale: 1.15 }} transition={{ type: 'spring', stiffness: 380, damping: 20 }}>
-                  {l.icon}
-                </motion.span>
-                <motion.span className="NavItem__label" whileHover={{ color: '#ffffff' }} transition={{ duration: .35 }}>{l.label}</motion.span>
-                <motion.span
-                  className="NavItem__underline"
-                  layoutId={`nav-underline-${l.to}`}
-                  initial={false}
-                  whileHover={{ scaleX: 1, opacity: 1 }}
-                  transition={{ duration: .4, ease: 'easeOut' }}
-                />
-              </NavLink>
+              {l.to === '/login' ? (
+                <button
+                  onClick={handleLoginClick}
+                  className="NavItem login-nav-button"
+                >
+                  <motion.span className="NavItem__icon" whileHover={{ scale: 1.15 }} transition={{ type: 'spring', stiffness: 380, damping: 20 }}>
+                    {l.icon}
+                  </motion.span>
+                  <motion.span className="NavItem__label" whileHover={{ color: '#ffffff' }} transition={{ duration: .35 }}>{l.label}</motion.span>
+                  <motion.span
+                    className="NavItem__underline"
+                    layoutId={`nav-underline-${l.to}`}
+                    initial={false}
+                    whileHover={{ scaleX: 1, opacity: 1 }}
+                    transition={{ duration: .4, ease: 'easeOut' }}
+                  />
+                </button>
+              ) : (
+                <NavLink
+                  to={l.to}
+                  onClick={closeMobile}
+                  className={({ isActive }) => `NavItem ${isActive ? 'is-active' : ''}`}
+                >
+                  <motion.span className="NavItem__icon" whileHover={{ scale: 1.15 }} transition={{ type: 'spring', stiffness: 380, damping: 20 }}>
+                    {l.icon}
+                  </motion.span>
+                  <motion.span className="NavItem__label" whileHover={{ color: '#ffffff' }} transition={{ duration: .35 }}>{l.label}</motion.span>
+                  <motion.span
+                    className="NavItem__underline"
+                    layoutId={`nav-underline-${l.to}`}
+                    initial={false}
+                    whileHover={{ scaleX: 1, opacity: 1 }}
+                    transition={{ duration: .4, ease: 'easeOut' }}
+                  />
+                </NavLink>
+              )}
             </motion.li>
           ))}
         </motion.ul>
@@ -109,6 +140,25 @@ const Navbar = memo(() => {
         <AnimatePresence>
           {mobileOpen && (
             <>
+              {/* Backdrop Overlay - positioned first so it appears behind the drawer */}
+              <motion.div
+                className="NavOverlay"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1, transition: { duration: 0.3 } }}
+                exit={{ opacity: 0, transition: { duration: 0.25 } }}
+                onClick={closeMobile}
+                style={{
+                  position: 'fixed',
+                  inset: 0,
+                  background: 'rgba(0, 0, 0, 0.5)',
+                  zIndex: 1500,
+                  border: 'none',
+                  cursor: 'pointer'
+                }}
+                aria-label="Close menu"
+              />
+              
+              {/* Mobile Navigation Drawer - positioned above the overlay */}
               <motion.div
                 aria-label="Mobile navigation"
                 role="navigation"
@@ -116,36 +166,44 @@ const Navbar = memo(() => {
                 initial={{ x: '100%' }}
                 animate={{ x: 0, transition: { duration: 0.45, ease: 'easeOut' } }}
                 exit={{ x: '100%', transition: { duration: 0.35, ease: 'easeIn' } }}
+                style={{ zIndex: 2000 }}
               >
                 <ul className="NavDrawer__list">
                   {links.map(l => (
                     <motion.li key={l.to} whileHover={{ x: 4 }} transition={{ type: 'spring', stiffness: 340, damping: 26 }}>
-                      <NavLink
-                        to={l.to}
-                        onClick={closeMobile}
-                        className={({ isActive }) => `NavDrawer__link ${isActive ? 'is-active' : ''}`}
-                      >
-                        <motion.span className="NavDrawer__icon" whileHover={{ scale: 1.2, rotate: 3 }} transition={{ type: 'spring', stiffness: 360, damping: 18 }}>{l.icon}</motion.span>
-                        <motion.span className="NavDrawer__label" whileHover={{ color: '#fff' }} transition={{ duration: .3 }}>{l.label}</motion.span>
-                      </NavLink>
+                      {l.to === '/login' ? (
+                        <button
+                          onClick={(e) => {
+                            handleLoginClick(e);
+                            closeMobile();
+                          }}
+                          className="NavDrawer__link login-nav-button"
+                        >
+                          <motion.span className="NavDrawer__icon" whileHover={{ scale: 1.2, rotate: 3 }} transition={{ type: 'spring', stiffness: 360, damping: 18 }}>{l.icon}</motion.span>
+                          <motion.span className="NavDrawer__label" whileHover={{ color: '#fff' }} transition={{ duration: .3 }}>{l.label}</motion.span>
+                        </button>
+                      ) : (
+                        <NavLink
+                          to={l.to}
+                          onClick={closeMobile}
+                          className={({ isActive }) => `NavDrawer__link ${isActive ? 'is-active' : ''}`}
+                        >
+                          <motion.span className="NavDrawer__icon" whileHover={{ scale: 1.2, rotate: 3 }} transition={{ type: 'spring', stiffness: 360, damping: 18 }}>{l.icon}</motion.span>
+                          <motion.span className="NavDrawer__label" whileHover={{ color: '#fff' }} transition={{ duration: .3 }}>{l.label}</motion.span>
+                        </NavLink>
+                      )}
                     </motion.li>
                   ))}
                 </ul>
               </motion.div>
-              <motion.button
-                type="button"
-                aria-label="Close menu"
-                className="NavOverlay"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1, transition: { duration: 0.3 } }}
-                exit={{ opacity: 0, transition: { duration: 0.25 } }}
-                onClick={closeMobile}
-              />
             </>
           )}
         </AnimatePresence>,
         document.body
       )}
+      
+      {/* Login Card Overlay */}
+      <LoginCard isOpen={showLoginCard} onClose={closeLoginCard} />
     </header>
   );
 });

@@ -148,6 +148,7 @@ select.pill{background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://ww
 .pill{transition:box-shadow .2s, border-color .2s, transform .08s}
 .pill:active{transform:scale(.995)}
 @keyframes slide{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 .summary{list-style:none;padding:0;margin:8px 0 0 0;color:#cfe4ff}
 .summary li{margin:6px 0}
 .review-card {
