@@ -35,10 +35,18 @@ const Board = sequelize.define('Board', {
     validate: {
       notEmpty: true
     }
+  },
+  user_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'users',
+      key: 'user_id'
+    }
   }
 }, {
   tableName: 'board',
-  timestamps: false // No created_at/updated_at in the actual schema
+  timestamps: false
 });
 
 module.exports = Board;
