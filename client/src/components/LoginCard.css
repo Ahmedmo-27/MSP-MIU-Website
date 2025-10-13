@@ -1,19 +1,6 @@
 /* Login Card Component Styles */
 .login-overlay {
   /* Overlay styles are now handled inline for better control */
-  /* Ensure custom cursor is visible over the overlay */
-  cursor: none !important;
-}
-
-/* Ensure custom cursor is visible over login overlay */
-@media (min-width: 781px) and (hover: hover) {
-  .login-overlay {
-    cursor: none !important;
-  }
-  
-  .login-overlay * {
-    cursor: none !important;
-  }
 }
 
 .login-card {

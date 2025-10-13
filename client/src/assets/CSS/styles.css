@@ -8,26 +8,6 @@
 *{box-sizing:border-box}
 *{box-sizing:border-box}
 
-/* Global cursor management for custom cursor */
-@media (min-width: 781px) and (hover: hover) {
-  * {
-    cursor: none !important;
-  }
-  
-  html, body {
-    cursor: none !important;
-  }
-  
-  /* Override any explicit cursor styles */
-  button, a, input, textarea, select, [role="button"], .btn, .interactive {
-    cursor: none !important;
-  }
-  
-  /* Ensure cursor is hidden on all page elements */
-  div, span, p, h1, h2, h3, h4, h5, h6, section, article, main, header, footer, nav, aside {
-    cursor: none !important;
-  }
-}
 /* prevent iOS/Android from resizing text unexpectedly */
 html,body{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%}
 body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;color:#eaf2ff;background:
