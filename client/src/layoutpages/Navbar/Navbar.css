@@ -7,10 +7,10 @@
     position: sticky;
     top: 0;
     z-index: 1000;
-    backdrop-filter: blur(18px) saturate(140%);
+    backdrop-filter: blur(10px);
     background: rgba(3, 28, 53, 0.78);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    transition: background .35s ease, box-shadow .35s ease;
+    transition: background .2s ease, box-shadow .2s ease;
 }
 
 .Navbar--scrolled {
@@ -89,7 +89,7 @@
 .NavItem:hover {
     background: rgba(0, 119, 204, 0.22);
     color: #fff;
-    scale: 1.05;
+    transform: scale(1.05);
 }
 
 .NavItem.is-active {
@@ -201,8 +201,12 @@
     padding: .85rem .85rem;
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.04);
-    backdrop-filter: blur(6px);
-    transition: background .25s, color .25s, transform .25s;
+    transition: background .2s, color .2s;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
 }
 
 .NavDrawer__link.is-active {
@@ -219,18 +223,7 @@
     flex: 1;
 }
 
-/* Login Button Styles */
-.login-nav-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    margin: 0;
-    width: 100%;
-    text-align: left;
-}
-
-.login-nav-button:focus {
+.NavDrawer__link:focus {
     outline: none;
     box-shadow: 0 0 0 3px rgba(3, 169, 244, .45);
 }
