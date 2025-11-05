@@ -47,14 +47,8 @@ export default defineConfig({
     },
     // Enable source maps for production debugging
     sourcemap: false,
-    // Optimize bundle size
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true
-      }
-    },
+    // Optimize bundle size - using esbuild (built into Vite, no extra dependency needed)
+    minify: 'esbuild',
     // Set chunk size warning limit
     chunkSizeWarningLimit: 1000
   },
