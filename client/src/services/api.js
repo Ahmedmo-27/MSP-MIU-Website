@@ -2,6 +2,30 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
   ? '/api' 
   : 'http://localhost:3000/api';
 
+// Simple cache implementation
+const cache = new Map();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+function getCacheKey(url, options = {}) {
+  return `${url}_${JSON.stringify(options)}`;
+}
+
+function getCachedData(key) {
+  const cached = cache.get(key);
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    return cached.data;
+  }
+  cache.delete(key);
+  return null;
+}
+
+function setCachedData(key, data) {
+  cache.set(key, {
+    data,
+    timestamp: Date.now()
+  });
+}
+
 class ApiService {
   static async submitApplication(formData) {
     try {
@@ -34,25 +58,23 @@ class ApiService {
 
   static async getAllApplications(filters = {}) {
     try {
-      // Build query string from filters
-      const queryParams = new URLSearchParams();
+      const cacheKey = getCacheKey(`${API_BASE_URL}/applications`);
+      const cachedData = getCachedData(cacheKey);
       
-      Object.keys(filters).forEach(key => {
-        if (filters[key] !== null && filters[key] !== undefined && filters[key] !== '') {
-          queryParams.append(key, filters[key]);
-        }
-      });
-      
-      const queryString = queryParams.toString();
-      const url = queryString ? `${API_BASE_URL}/applications?${queryString}` : `${API_BASE_URL}/applications`;
-      
-      const response = await fetch(url);
+      if (cachedData) {
+        console.log('Returning cached applications data');
+        return cachedData;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/applications`);
       const result = await response.json();
       
       if (!response.ok) {
         throw new Error(result.error || 'Failed to fetch applications');
       }
 
+      // Cache the result
+      setCachedData(cacheKey, result);
       return result;
     } catch (error) {
       console.error('Error fetching applications:', error);
@@ -75,6 +97,10 @@ class ApiService {
       if (!response.ok) {
         throw new Error(result.error || 'Failed to update application status');
       }
+
+      // Invalidate cache when data is updated
+      const cacheKey = getCacheKey(`${API_BASE_URL}/applications`);
+      cache.delete(cacheKey);
 
       return result;
     } catch (error) {
@@ -99,6 +125,10 @@ class ApiService {
         throw new Error(result.error || 'Failed to update application comment');
       }
 
+      // Invalidate cache when data is updated
+      const cacheKey = getCacheKey(`${API_BASE_URL}/applications`);
+      cache.delete(cacheKey);
+
       return result;
     } catch (error) {
       console.error('Error updating application comment:', error);
@@ -117,6 +147,10 @@ class ApiService {
       if (!response.ok) {
         throw new Error(result.error || 'Failed to delete application');
       }
+
+      // Invalidate cache when data is updated
+      const cacheKey = getCacheKey(`${API_BASE_URL}/applications`);
+      cache.delete(cacheKey);
 
       return result;
     } catch (error) {

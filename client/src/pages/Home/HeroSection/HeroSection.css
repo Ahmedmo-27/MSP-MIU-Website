@@ -1,0 +1,57 @@
+.Hero { position:relative; padding: 140px 0 110px; overflow:hidden; }
+.Hero__inner { width:100%; max-width:1400px; margin:0 auto; display:grid; grid-template-columns: 1.4fr 1fr; gap:70px; align-items:stretch; padding:0 54px; min-height:500px; }
+.Hero__title { font-size: clamp(2.4rem, 5vw, 3.8rem); line-height:1.1; margin:0 0 28px; font-weight:700; background:linear-gradient(135deg,#8EC2F0,#03A9F4,#0077CC); -webkit-background-clip:text; background-clip:text; color:transparent; letter-spacing:.5px; }
+.Hero__title span { color:#F4581F; background:linear-gradient(90deg,#FFC107,#F4581F); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.Hero__subtitle { margin:0 0 40px; max-width:640px; color:#8EC2F0; font-size: clamp(.95rem, 1.4vw, 1.15rem); line-height:1.55; letter-spacing:.35px; }
+.Hero__ctas { display:flex; gap:20px; }
+.HeroCTA { text-decoration:none; font-weight:600; letter-spacing:.5px; font-size:.95rem; padding:15px 32px; border-radius:14px; position:relative; display:inline-flex; align-items:center; justify-content:center; backdrop-filter: blur(10px) saturate(160%); box-shadow:0 8px 28px -10px rgba(0,0,0,.65); transition: background .4s, color .4s; }
+.HeroCTA--primary { background:linear-gradient(135deg,#0077CC,#03A9F4); color:#fff; }
+.HeroCTA--primary:hover { background:linear-gradient(135deg,#03A9F4,#0077CC); }
+.HeroCTA--ghost { background:rgba(255,255,255,.08); color:#fff; border:1px solid rgba(255,255,255,.15); }
+.HeroCTA--ghost:hover { background:rgba(255,255,255,.15); }
+.Hero__bg { position:absolute; inset:0; background:linear-gradient(140deg,#031C35,#0D3159 45%,#1D4F82 65%, #031C35); opacity:.85; z-index:-2; }
+
+/* Text column styles */
+.Hero__col--text { display:flex; flex-direction:column; justify-content:center; max-height:500px; overflow:hidden; }
+
+/* Logo showcase styles */
+.Hero__col--logo { display:flex; align-items:center; justify-content:center; min-height:350px; max-height:400px; }
+.Hero__logoWrap { position:relative; display:flex; align-items:center; justify-content:center; width:100%; height:100%; min-height:350px; max-height:400px; }
+.Hero__logoContainer { position:relative; z-index:2; }
+.Hero__logo { width:220px; height:220px; object-fit:contain; filter:drop-shadow(0 20px 40px rgba(3,169,244,.3)) drop-shadow(0 8px 16px rgba(0,119,204,.2)); transition:filter .3s ease; }
+.Hero__logo:hover { filter:drop-shadow(0 25px 50px rgba(3,169,244,.4)) drop-shadow(0 12px 24px rgba(0,119,204,.3)); }
+
+/* Floating decorative elements */
+.Hero__float { position:absolute; border-radius:50%; background:linear-gradient(135deg,rgba(3,169,244,.6),rgba(0,119,204,.4)); backdrop-filter:blur(10px); z-index:1; }
+.Hero__float--1 { width:60px; height:60px; top:20%; left:10%; animation:float1 6s ease-in-out infinite; }
+.Hero__float--2 { width:45px; height:45px; top:60%; right:15%; animation:float2 8s ease-in-out infinite; }
+.Hero__float--3 { width:75px; height:75px; bottom:20%; left:20%; animation:float3 10s ease-in-out infinite; }
+
+/* Glow effect */
+.Hero__glow--logo { position:absolute; inset:-50px; background:radial-gradient(circle at center,rgba(3,169,244,.15) 0%,rgba(0,119,204,.08) 40%,transparent 70%); border-radius:50%; z-index:0; }
+
+/* Floating animations */
+@keyframes float1 { 0%,100% { transform:translateY(0) rotate(0deg); } 50% { transform:translateY(-20px) rotate(180deg); } }
+@keyframes float2 { 0%,100% { transform:translateY(0) rotate(0deg); } 50% { transform:translateY(-15px) rotate(-180deg); } }
+@keyframes float3 { 0%,100% { transform:translateY(0) rotate(0deg); } 50% { transform:translateY(-25px) rotate(90deg); } }
+
+@media (max-width:1080px){ 
+  .Hero__inner { grid-template-columns:1fr; gap:60px; padding:0 38px; min-height:auto; } 
+  .Hero { padding:120px 0 100px; } 
+  .Hero__col--text { max-height:none; }
+  .Hero__col--logo { max-height:350px; }
+  .Hero__logoWrap { height:280px; min-height:280px; max-height:350px; }
+  .Hero__logo { width:180px; height:180px; }
+}
+@media (max-width:680px){ 
+  .Hero__inner { padding:0 26px; min-height:auto; } 
+  .HeroCTA { padding:14px 26px; font-size:.85rem; } 
+  .Hero__ctas { flex-direction:column; align-items:flex-start; }
+  .Hero__col--text { max-height:none; }
+  .Hero__col--logo { max-height:280px; }
+  .Hero__logoWrap { height:220px; min-height:220px; max-height:280px; }
+  .Hero__logo { width:150px; height:150px; }
+  .Hero__float--1 { width:50px; height:50px; }
+  .Hero__float--2 { width:35px; height:35px; }
+  .Hero__float--3 { width:60px; height:60px; }
+}
