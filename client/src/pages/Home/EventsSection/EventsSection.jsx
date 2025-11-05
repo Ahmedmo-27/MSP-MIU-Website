@@ -15,13 +15,11 @@ const EventsSection = memo(() => {
   const initialAnimation = useMemo(() => ({ opacity: 0, y: 30 }), []);
   const whileInViewAnimation = useMemo(() => ({ opacity: 1, y: 0 }), []);
   const viewportProps = useMemo(() => ({ once: true, amount: 0.2 }), []);
-  const transitionProps = useMemo(() => ({ duration: .6, ease: 'easeOut' }), []);
   const hoverAnimation = useMemo(() => ({ y: -10, boxShadow: '0 14px 40px -12px rgba(0,0,0,.65), 0 0 0 1px rgba(0,119,204,.5)' }), []);
   
   const buttonHoverAnimation = useMemo(() => ({ scale: 1.07 }), []);
   const buttonTapAnimation = useMemo(() => ({ scale: .92 }), []);
-  const buttonTransition = useMemo(() => ({ type: 'spring', stiffness: 420, damping: 30 }), []);
-
+  
   return (
     <section className="Events" aria-labelledby="events-heading">
       <div className="Events__head">
@@ -35,7 +33,6 @@ const EventsSection = memo(() => {
             initial={initialAnimation}
             whileInView={whileInViewAnimation}
             viewport={viewportProps}
-            transition={transitionProps}
             whileHover={hoverAnimation}
           >
             <div className="EventCard__media" />
@@ -46,7 +43,6 @@ const EventsSection = memo(() => {
                 className="EventCard__btn" 
                 whileHover={buttonHoverAnimation} 
                 whileTap={buttonTapAnimation} 
-                transition={buttonTransition}
               >
                 {ev.action}
               </motion.button>

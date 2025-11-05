@@ -27,7 +27,6 @@ const SponsorsSection = memo(() => {
     const counterInitialAnimation = useMemo(() => ({ opacity: 0, y: 18 }), []);
     const counterWhileInViewAnimation = useMemo(() => ({ opacity: 1, y: 0 }), []);
     const counterViewportProps = useMemo(() => ({ once: true, amount: 0.3 }), []);
-    const counterTransition = useMemo(() => ({ duration: .6, ease: 'easeOut' }), []);
     const counterHoverAnimation = useMemo(() => ({ y: -6, boxShadow: '0 12px 34px -10px rgba(0,0,0,.6), 0 0 0 1px rgba(0,119,204,.4)' }), []);
 
     return (
@@ -43,7 +42,6 @@ const SponsorsSection = memo(() => {
                         initial={sponsorInitialAnimation}
                         whileInView={sponsorWhileInViewAnimation}
                         viewport={sponsorViewportProps}
-                        transition={sponsorTransition}
                     >
                         <div className="SponsorLogo__img" data-name={s.name}>{s.logo || s.name}</div>
                     </motion.a>
@@ -57,7 +55,6 @@ const SponsorsSection = memo(() => {
                         initial={counterInitialAnimation}
                         whileInView={counterWhileInViewAnimation}
                         viewport={counterViewportProps}
-                        transition={counterTransition}
                         whileHover={counterHoverAnimation}
                     >
                         <div className="Counter__value" data-target={c.value}>{c.value}+</div>

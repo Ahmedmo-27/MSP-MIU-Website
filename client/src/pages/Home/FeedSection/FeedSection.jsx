@@ -30,8 +30,7 @@ const FeedSection = memo(({ isMember = false }) => {
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: .55, ease: 'easeOut' }}
-            whileHover={{ y: -8, boxShadow: '0 12px 38px -10px rgba(0,0,0,.65), 0 0 0 1px rgba(0,119,204,.35)' }}
+            whileHover={{ y: -8 }}
           >
             <div className="FeedCard__top">
               <span className="FeedCard__dept" data-dept={a.dept}>{a.dept}</span>
@@ -39,7 +38,7 @@ const FeedSection = memo(({ isMember = false }) => {
             </div>
             <h3 className="FeedCard__title">{a.title}</h3>
             <p className="FeedCard__desc">{a.desc}</p>
-            <motion.a href="#" className="FeedCard__more" whileHover={{ color: '#fff', x: 3 }} transition={{ type: 'spring', stiffness: 380, damping: 22 }}>Read more →</motion.a>
+            <motion.a href="#" className="FeedCard__more" whileHover={{ color: '#fff', x: 3 }}>Read more →</motion.a>
           </motion.article>
         ))}
       </div>

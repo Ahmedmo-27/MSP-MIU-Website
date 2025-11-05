@@ -15,15 +15,15 @@ import mspLogo from '../../assets/Images/msp-logo.png';
 const links = [
   { to: '/', label: 'Home', icon: <FaHome /> },
   { to: '/about', label: 'About Us', icon: <MdGroups /> },
-  { to: '/board', label: 'Meet the Board', icon: <FaUsers /> },
-  { to: '/become-member', label: 'Become a Member', icon: <FaUserPlus /> },
+  // { to: '/board', label: 'Meet the Board', icon: <FaUsers /> },
+  // { to: '/become-member', label: 'Become a Member', icon: <FaUserPlus /> },
   { to: '/login', label: 'Login', icon: <FaSignInAlt /> },
-  { to: '/exercises', label: 'Exercises', icon: <FaDumbbell /> },
-  { to: '/sessions', label: 'Sessions', icon: <FaChalkboardTeacher /> },
+  // // { to: '/exercises', label: 'Exercises', icon: <FaDumbbell /> },
+  // { to: '/sessions', label: 'Sessions', icon: <FaChalkboardTeacher /> },
   { to: '/events', label: 'Events', icon: <FaCalendarAlt /> },
-  { to: '/suggestions', label: 'Suggestions', icon: <FaLightbulb /> },
-  { to: '/leaderboard', label: 'Leaderboard', icon: <FaTrophy /> },
-  { to: '/sponsors', label: 'Sponsors', icon: <FaHandshake /> }
+  // { to: '/suggestions', label: 'Suggestions', icon: <FaLightbulb /> },
+  // { to: '/leaderboard', label: 'Leaderboard', icon: <FaTrophy /> },
+  // { to: '/sponsors', label: 'Sponsors', icon: <FaHandshake /> }
 ];
 
 // Memoized animation variants
@@ -40,17 +40,8 @@ const Navbar = memo(() => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showLoginCard, setShowLoginCard] = useState(false);
-  const location = useLocation();
 
   // Memoized scroll handler
-  const handleScroll = useCallback(() => {
-    setScrolled(window.scrollY > 10);
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [handleScroll]);
 
   useEffect(() => { 
     document.body.style.overflow = mobileOpen ? 'hidden' : ''; 
@@ -70,7 +61,7 @@ const Navbar = memo(() => {
   return (
     <header className={`Navbar Navbar--flat ${scrolled ? 'Navbar--scrolled' : ''}`}>      
       <div className="Navbar__inner">
-        <motion.div whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.97 }} transition={{ type: 'spring', stiffness: 360, damping: 22 }}>
+        <motion.div whileHover={{ scale: 1.06 }}>
           <NavLink to="/" className="Navbar__brand" onClick={closeMobile} aria-label="MSP Home">
             <motion.img
               src={mspLogo}
@@ -78,34 +69,30 @@ const Navbar = memo(() => {
               className="Navbar__logoImg"
               height={40}
               width={50}
-              style={{ marginRight: '0.5rem' }}
-              whileHover={{ filter: 'drop-shadow(0 0 6px rgba(3,169,244,.8)) brightness(1.15)' }}
-              transition={{ type: 'spring', stiffness: 280, damping: 18 }}
             />
-            <motion.div className="Navbar__logoMark" layout whileHover={{ textShadow: '0 0 12px rgba(3,169,244,.9)' }} transition={{ duration: .35 }}>
+            <motion.div className="Navbar__logoMark">
               MSP
             </motion.div>
-            <motion.div className="Navbar__logoText" whileHover={{ color: '#fff' }} transition={{ duration: .35 }}>Tech Club</motion.div>
+            <motion.div className="Navbar__logoText">Tech Club</motion.div>
           </NavLink>
         </motion.div>
         <motion.ul className="Navbar__links" variants={navMotion} initial="hidden" animate="visible">
           {links.map(l => (
-            <motion.li key={l.to} variants={itemMotion} whileHover={{ y: -2 }} transition={{ type: 'spring', stiffness: 400, damping: 26 }}>
+            <motion.li key={l.to} variants={itemMotion} whileHover={{ y: -2 }}>
               {l.to === '/login' ? (
                 <button
                   onClick={handleLoginClick}
                   className="NavItem login-nav-button"
                 >
-                  <motion.span className="NavItem__icon" whileHover={{ scale: 1.15 }} transition={{ type: 'spring', stiffness: 380, damping: 20 }}>
+                  <motion.span className="NavItem__icon" whileHover={{ scale: 1.15 }}>
                     {l.icon}
                   </motion.span>
-                  <motion.span className="NavItem__label" whileHover={{ color: '#ffffff' }} transition={{ duration: .35 }}>{l.label}</motion.span>
+                  <motion.span className="NavItem__label" whileHover={{ color: '#ffffff' }}>{l.label}</motion.span>
                   <motion.span
                     className="NavItem__underline"
                     layoutId={`nav-underline-${l.to}`}
                     initial={false}
                     whileHover={{ scaleX: 1, opacity: 1 }}
-                    transition={{ duration: .4, ease: 'easeOut' }}
                   />
                 </button>
               ) : (
@@ -114,16 +101,15 @@ const Navbar = memo(() => {
                   onClick={closeMobile}
                   className={({ isActive }) => `NavItem ${isActive ? 'is-active' : ''}`}
                 >
-                  <motion.span className="NavItem__icon" whileHover={{ scale: 1.15 }} transition={{ type: 'spring', stiffness: 380, damping: 20 }}>
+                  <motion.span className="NavItem__icon" whileHover={{ scale: 1.15 }}>
                     {l.icon}
                   </motion.span>
-                  <motion.span className="NavItem__label" whileHover={{ color: '#ffffff' }} transition={{ duration: .35 }}>{l.label}</motion.span>
+                  <motion.span className="NavItem__label" whileHover={{ color: '#ffffff' }}>{l.label}</motion.span>
                   <motion.span
                     className="NavItem__underline"
                     layoutId={`nav-underline-${l.to}`}
                     initial={false}
                     whileHover={{ scaleX: 1, opacity: 1 }}
-                    transition={{ duration: .4, ease: 'easeOut' }}
                   />
                 </NavLink>
               )}
@@ -144,8 +130,8 @@ const Navbar = memo(() => {
               <motion.div
                 className="NavOverlay"
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 1, transition: { duration: 0.3 } }}
-                exit={{ opacity: 0, transition: { duration: 0.25 } }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 onClick={closeMobile}
                 style={{
                   position: 'fixed',
@@ -164,8 +150,8 @@ const Navbar = memo(() => {
                 role="navigation"
                 className="NavDrawer"
                 initial={{ x: '100%' }}
-                animate={{ x: 0, transition: { duration: 0.45, ease: 'easeOut' } }}
-                exit={{ x: '100%', transition: { duration: 0.35, ease: 'easeIn' } }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
                 style={{ zIndex: 2000 }}
               >
                 <ul className="NavDrawer__list">
