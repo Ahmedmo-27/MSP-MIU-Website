@@ -53,8 +53,20 @@ const AppRouter = () => (
     <CustomCursor />
     <Suspense fallback={<PageLoader />}>
       <Routes>
-        <Route path="/" element={<App />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/" element={<SiteLayout><Home /></SiteLayout>} />
+        <Route path="/about" element={<SiteLayout><AboutUs /></SiteLayout>} />
+        <Route path="/board" element={<SiteLayout><Board /></SiteLayout>} />
+        <Route path="/become-member" element={<SiteLayout><BecomeMember /></SiteLayout>} />
+        <Route path="/login" element={<SiteLayout><Login /></SiteLayout>} />
+        <Route path="/exercises" element={<SiteLayout><Exercises /></SiteLayout>} />
+        <Route path="/sessions" element={<SiteLayout><Sessions /></SiteLayout>} />
+        <Route path="/events" element={<SiteLayout><Events /></SiteLayout>} />
+        <Route path="/suggestions" element={<SiteLayout><Suggestions /></SiteLayout>} />
+        <Route path="/leaderboard" element={<SiteLayout><Leaderboard /></SiteLayout>} />
+        <Route path="/sponsors" element={<SiteLayout><Sponsors /></SiteLayout>} />
+        <Route path="/applications" element={<SiteLayout><ApplicationsPage /></SiteLayout>} />
+        <Route path="/form" element={<App />} />
+        <Route path="/registeration-admin" element={<SiteLayout><Dashboard /></SiteLayout>} />
       </Routes>
     </Suspense>
   </Router>
