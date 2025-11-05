@@ -183,6 +183,8 @@
     border-left: 1px solid rgba(255, 255, 255, 0.12);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    /* Ensure proper stacking context */
+    isolation: isolate;
 }
 
 .NavDrawer__list {
@@ -231,6 +233,22 @@
     flex: 1;
 }
 
+/* Login Button Styles */
+.login-nav-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    text-align: left;
+}
+
+.login-nav-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(3, 169, 244, .45);
+}
+
 .NavOverlay {
     position: fixed;
     inset: 0;
@@ -239,6 +257,10 @@
     z-index: 1500;
     border: none;
     cursor: pointer;
+    /* Ensure proper stacking context */
+    isolation: isolate;
+    /* Prevent any potential pointer events issues */
+    pointer-events: auto;
 }
 
 @media (max-width:1450px) {

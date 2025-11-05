@@ -180,9 +180,26 @@ const App = memo(() => {
       setScreen('success')
     } catch (error) {
       console.error('Failed to submit application:', error);
-      // Show server-provided message where available
-      const msg = error.message || (error && error.error) || 'Failed to submit application. Please try again.';
-      alert(msg);
+      
+      // Handle specific error types
+      let errorMessage = 'Failed to submit application. Please try again.';
+      
+      if (error.message) {
+        if (error.message.includes('duplicate') || error.message.includes('already exists')) {
+          errorMessage = 'An application with this email or student ID already exists.';
+        } else if (error.message.includes('validation') || error.message.includes('invalid')) {
+          errorMessage = 'Please check your information and try again.';
+        } else if (error.message.includes('Network') || error.message.includes('fetch')) {
+          errorMessage = 'Network error. Please check your connection and try again.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      // Show error message
+      alert(errorMessage);
+      
+      // Don't reset the form on error, let user fix the issues
     } finally {
       setSubmitting(false)
     }
@@ -389,7 +406,24 @@ const App = memo(() => {
               <button type="button" className="btn" onClick={() => { if (validateCurrentStep()) setStep(5) }}>Review</button>
             )}
             {step === 5 && (
-              <button type="submit" disabled={submitting} className="btn primary">{submitting ? 'Submitting…' : 'Submit'}</button>
+              <button type="submit" disabled={submitting} className="btn primary">
+                {submitting ? (
+                  <>
+                    <span style={{ display: 'inline-block', marginRight: '8px' }}>
+                      <div style={{
+                        width: '16px',
+                        height: '16px',
+                        border: '2px solid rgba(255,255,255,0.3)',
+                        borderTop: '2px solid white',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite',
+                        display: 'inline-block'
+                      }} />
+                    </span>
+                    Submitting…
+                  </>
+                ) : 'Submit'}
+              </button>
             )}
           </div>
         </form>

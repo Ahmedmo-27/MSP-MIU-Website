@@ -27,6 +27,91 @@ function setCachedData(key, data) {
 }
 
 class ApiService {
+  // Get auth token from localStorage
+  static getAuthToken() {
+    return localStorage.getItem('authToken');
+  }
+
+  // Set auth token in localStorage
+  static setAuthToken(token) {
+    localStorage.setItem('authToken', token);
+  }
+
+  // Remove auth token from localStorage
+  static removeAuthToken() {
+    localStorage.removeItem('authToken');
+  }
+
+  // Get headers with auth token if available
+  static getHeaders(includeAuth = false) {
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (includeAuth) {
+      const token = this.getAuthToken();
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+    }
+    
+    return headers;
+  }
+
+  // Login method
+  static async login(email, password) {
+    try {
+      console.log('API Service - Attempting login for:', email);
+      
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify({ email, password }),
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Login failed');
+      }
+
+      // Store the token if login is successful
+      if (result.token) {
+        this.setAuthToken(result.token);
+      }
+
+      return result;
+    } catch (error) {
+      console.error('Error during login:', error);
+      throw error;
+    }
+  }
+
+  // Logout method
+  static async logout() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/logout`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+      });
+
+      // Remove token regardless of response
+      this.removeAuthToken();
+      
+      return response.ok;
+    } catch (error) {
+      console.error('Error during logout:', error);
+      // Remove token even if logout fails
+      this.removeAuthToken();
+      return false;
+    }
+  }
+
+  // Check if user is authenticated
+  static isAuthenticated() {
+    return !!this.getAuthToken();
+  }
+
   static async submitApplication(formData) {
     try {
       console.log('API Service - Sending data:', formData);
@@ -34,9 +119,7 @@ class ApiService {
       
       const response = await fetch(`${API_BASE_URL}/applications`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.getHeaders(),
         body: JSON.stringify(formData),
       });
 
@@ -56,7 +139,7 @@ class ApiService {
   }
 
 
-  static async getAllApplications(filters = {}) {
+  static async getAllApplications() {
     try {
       const cacheKey = getCacheKey(`${API_BASE_URL}/applications`);
       const cachedData = getCachedData(cacheKey);
@@ -66,7 +149,11 @@ class ApiService {
         return cachedData;
       }
 
-      const response = await fetch(`${API_BASE_URL}/applications`);
+      const response = await fetch(`${API_BASE_URL}/applications`, {
+        method: 'GET',
+        headers: this.getHeaders(true), // Include auth token for admin access
+      });
+      
       const result = await response.json();
       
       if (!response.ok) {
@@ -82,14 +169,12 @@ class ApiService {
     }
   }
 
-  static async updateApplicationStatus(id, status, password = null) {
+  static async updateApplicationStatus(id, status) {
     try {
       const response = await fetch(`${API_BASE_URL}/applications/${id}/status`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status, password }),
+        headers: this.getHeaders(true), // Include auth token for admin access
+        body: JSON.stringify({ status }),
       });
 
       const result = await response.json();
@@ -113,9 +198,7 @@ class ApiService {
     try {
       const response = await fetch(`${API_BASE_URL}/applications/${id}/comment`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.getHeaders(true), // Include auth token for admin access
         body: JSON.stringify({ comment }),
       });
 
@@ -140,6 +223,7 @@ class ApiService {
     try {
       const response = await fetch(`${API_BASE_URL}/applications/${id}`, {
         method: 'DELETE',
+        headers: this.getHeaders(true), // Include auth token for admin access
       });
 
       const result = await response.json();
