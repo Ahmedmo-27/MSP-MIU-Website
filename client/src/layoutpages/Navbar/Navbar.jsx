@@ -122,13 +122,17 @@ const Navbar = memo(() => {
                 animate={{ x: 0 }}
                 exit={{ x: '100%' }}
                 transition={{ type: 'tween', duration: 0.3 }}
+                onClick={(e) => e.stopPropagation()}
               >
                 <ul className="NavDrawer__list">
                   {links.map(l => (
                     <li key={l.to}>
                       {l.to === '/login' ? (
                         <button
-                          onClick={handleLoginClick}
+                          onClick={(e) => {
+                            handleLoginClick(e);
+                            closeMobile();
+                          }}
                           className="NavDrawer__link"
                         >
                           <span className="NavDrawer__icon">{l.icon}</span>
