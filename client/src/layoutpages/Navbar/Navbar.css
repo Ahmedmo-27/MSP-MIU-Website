@@ -223,7 +223,18 @@
     flex: 1;
 }
 
-.NavDrawer__link:focus {
+/* Login Button Styles */
+.login-nav-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    text-align: left;
+}
+
+.login-nav-button:focus {
     outline: none;
     box-shadow: 0 0 0 3px rgba(3, 169, 244, .45);
 }
