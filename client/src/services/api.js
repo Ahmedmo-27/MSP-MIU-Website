@@ -151,7 +151,7 @@ class ApiService {
 
       const response = await fetch(`${API_BASE_URL}/applications`, {
         method: 'GET',
-        headers: this.getHeaders(true), // Include auth token for admin access
+        headers: this.getHeaders(false), // No auth token required for now
       });
       
       const result = await response.json();

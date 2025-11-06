@@ -430,12 +430,7 @@ const Dashboard = memo(() => {
   };
 
   useEffect(() => {
-    // Check if user is authenticated
-    if (!ApiService.isAuthenticated()) {
-      navigate('/login');
-      return;
-    }
-
+    // Authentication check removed for now - page is accessible without login
     const fetchApplications = async () => {
       try {
         const result = await ApiService.getAllApplications();
@@ -445,15 +440,9 @@ const Dashboard = memo(() => {
         setLoading(false);
       } catch (err) {
         console.error("Error fetching applications:", err);
-        
-        // If unauthorized, redirect to login
-        if (err.message.includes('Unauthorized') || err.message.includes('401')) {
-          ApiService.removeAuthToken();
-          navigate('/login');
-          return;
-        }
-        
         setLoading(false);
+        // Show error message to user
+        alert(`Error loading applications: ${err.message || 'Unknown error'}`);
       }
     };
 
@@ -545,10 +534,25 @@ const Dashboard = memo(() => {
     }
   }, [navigate]);
 
-  if (loading) return <p>Loading applications...</p>;
+  if (loading) {
+    return (
+      <div style={{ 
+        padding: "20px", 
+        textAlign: "center",
+        color: "#eaf2ff",
+        minHeight: "50vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center"
+      }}>
+        <p style={{ fontSize: "18px", margin: "20px 0" }}>Loading applications...</p>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ padding: "20px" }}>
+    <div style={{ padding: "20px", color: "#eaf2ff" }}>
       <TextModal />
       <CommentModal 
         commentModal={commentModal}
@@ -557,22 +561,8 @@ const Dashboard = memo(() => {
         saveComment={saveComment}
         textareaRef={textareaRef}
       />
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h2>Applications Dashboard</h2>
-        <button
-          onClick={handleLogout}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: '#e74c3c',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontSize: '14px'
-          }}
-        >
-          Logout
-        </button>
+      <div style={{ marginBottom: '20px' }}>
+        <h2 style={{ color: "#eaf2ff", margin: 0 }}>Applications Dashboard</h2>
       </div>
       
       {/* Charts Section */}

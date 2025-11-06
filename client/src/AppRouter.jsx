@@ -65,6 +65,7 @@ const AppRouter = () => (
         <Route path="/applications" element={<SiteLayout><ApplicationsPage /></SiteLayout>} />
         <Route path="/form" element={<App />} />
         <Route path="/registeration-admin" element={<SiteLayout><Dashboard /></SiteLayout>} />
+        <Route path="/registration-admin" element={<SiteLayout><Dashboard /></SiteLayout>} />
       </Routes>
     </Suspense>
   </Router>
