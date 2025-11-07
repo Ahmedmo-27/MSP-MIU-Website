@@ -9,7 +9,6 @@ const Board = lazy(() => import('./pages/Board'));
 const BecomeMember = lazy(() => import('./pages/BecomeMember'));
 const Login = lazy(() => import('./pages/Login'));
 const Exercises = lazy(() => import('./pages/Exercises'));
-const Sessions = lazy(() => import('./pages/Sessions'));
 const Events = lazy(() => import('./pages/Events'));
 const Suggestions = lazy(() => import('./pages/Suggestions'));
 const Leaderboard = lazy(() => import('./pages/Leaderboard'));
@@ -56,7 +55,6 @@ const AppRouter = () => (
         <Route path="/become-member" element={<SiteLayout><BecomeMember /></SiteLayout>} />
         <Route path="/login" element={<SiteLayout><Login /></SiteLayout>} />
         <Route path="/exercises" element={<SiteLayout><Exercises /></SiteLayout>} />
-        <Route path="/sessions" element={<SiteLayout><Sessions /></SiteLayout>} />
         <Route path="/events" element={<SiteLayout><Events /></SiteLayout>} />
         <Route path="/suggestions" element={<SiteLayout><Suggestions /></SiteLayout>} />
         <Route path="/leaderboard" element={<SiteLayout><Leaderboard /></SiteLayout>} />

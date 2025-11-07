@@ -190,6 +190,7 @@
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  margin-bottom: 5px;
 }
 
 .BoardMembers__grid .pc-details p {

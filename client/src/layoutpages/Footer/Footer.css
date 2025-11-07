@@ -95,7 +95,7 @@
 }
 
 .Footer__socialItem {
-    transition: transform 0.3s ease, scale 0.3s ease;
+    transition: scale 0.3s ease;
 }
 
 .Footer__socialItem:hover {

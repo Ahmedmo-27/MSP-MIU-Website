@@ -15,7 +15,6 @@ const links = [
   // { to: '/become-member', label: 'Become a Member', icon: <FaUserPlus /> },
   { to: '/login', label: 'Login', icon: <FaSignInAlt /> },
   // // { to: '/exercises', label: 'Exercises', icon: <FaDumbbell /> },
-  // { to: '/sessions', label: 'Sessions', icon: <FaChalkboardTeacher /> },
   { to: '/events', label: 'Events', icon: <FaCalendarAlt /> },
   // { to: '/suggestions', label: 'Suggestions', icon: <FaLightbulb /> },
   // { to: '/leaderboard', label: 'Leaderboard', icon: <FaTrophy /> },
@@ -44,7 +43,9 @@ const Navbar = memo(() => {
     setMobileOpen(false);
   }, [location.pathname]);
 
-  const closeMobile = useCallback(() => setMobileOpen(false), []);
+  const closeMobile = useCallback(() => {
+    setMobileOpen(false);
+  }, []);
   
   const handleLoginClick = useCallback((e) => {
     e.preventDefault();
@@ -53,6 +54,18 @@ const Navbar = memo(() => {
   }, [closeMobile]);
   
   const closeLoginCard = useCallback(() => setShowLoginCard(false), []);
+
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape' && mobileOpen) {
+        closeMobile();
+      }
+    };
+    if (mobileOpen) {
+      document.addEventListener('keydown', handleEscape);
+      return () => document.removeEventListener('keydown', handleEscape);
+    }
+  }, [mobileOpen, closeMobile]);
 
   return (
     <header className={`Navbar ${scrolled ? 'Navbar--scrolled' : ''}`}>      
@@ -122,7 +135,10 @@ const Navbar = memo(() => {
                 animate={{ x: 0 }}
                 exit={{ x: '100%' }}
                 transition={{ type: 'tween', duration: 0.3 }}
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  // Prevent clicks inside drawer from closing it
+                  e.stopPropagation();
+                }}
               >
                 <ul className="NavDrawer__list">
                   {links.map(l => (
@@ -130,8 +146,9 @@ const Navbar = memo(() => {
                       {l.to === '/login' ? (
                         <button
                           onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
                             handleLoginClick(e);
-                            closeMobile();
                           }}
                           className="NavDrawer__link"
                         >
@@ -141,8 +158,13 @@ const Navbar = memo(() => {
                       ) : (
                         <NavLink
                           to={l.to}
-                          onClick={closeMobile}
+                          onClick={(e) => {
+                            // Always close drawer immediately when clicking a link
+                            e.stopPropagation();
+                            closeMobile();
+                          }}
                           className={({ isActive }) => `NavDrawer__link ${isActive ? 'is-active' : ''}`}
+                          end
                         >
                           <span className="NavDrawer__icon">{l.icon}</span>
                           <span className="NavDrawer__label">{l.label}</span>
