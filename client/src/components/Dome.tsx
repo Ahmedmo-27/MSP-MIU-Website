@@ -383,6 +383,11 @@ export default function DomeGallery({
   }, []);
 
   return (
+    <div className="DomeGallery">
+    <div className="DomeGallery__head">
+          <h2 className="DomeGallery__title">Gallery</h2>
+          <p className="DomeGallery__subtitle">Moments from our journey together</p>
+        </div>
     <div
       ref={rootRef}
       className="sphere-root"
@@ -454,8 +459,9 @@ export default function DomeGallery({
         <div className="overlay" />
         <div className="overlay overlay--blur" />
         <div className="edge-fade edge-fade--top" />
-        <div className="edge-fade edge-fade--bottom" />
-      </main>
+          <div className="edge-fade edge-fade--bottom" />
+        </main>
+      </div>
     </div>
   );
 }

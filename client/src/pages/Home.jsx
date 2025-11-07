@@ -4,9 +4,7 @@ import HeroSection from './Home/HeroSection/HeroSection';
 // Lazy load heavy sections for better performance
 const FeedSection = lazy(() => import('./Home/FeedSection/FeedSection'));
 const EventsSection = lazy(() => import('./Home/EventsSection/EventsSection'));
-const SponsorsSection = lazy(() => import('./Home/SponsorsSection/SponsorsSection'));
-const MemberSection = lazy(() => import('./Home/MemberSection/MemberSection'));
-
+const DomeGallery = lazy(() => import('../components/Dome'));
 // Lightweight loading component for sections
 const SectionLoader = () => (
   <div style={{ 
@@ -35,10 +33,7 @@ export const Home = memo(() => {
 				<EventsSection />
 			</Suspense>
 			<Suspense fallback={<SectionLoader />}>
-				<SponsorsSection />
-			</Suspense>
-			<Suspense fallback={<SectionLoader />}>
-				<MemberSection isMember={isMember} />
+				<DomeGallery />
 			</Suspense>
 		</main>
 	);

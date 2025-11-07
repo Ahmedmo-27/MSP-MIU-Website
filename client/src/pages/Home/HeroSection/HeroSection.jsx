@@ -26,7 +26,7 @@ export const HeroSection = memo(() => {
             MSP Tech Club is a community-driven hub fostering innovation, collaboration, and growth through technology, events, sessions, and real-world impact.
           </p>
           <div className="Hero__ctas">
-            <a href="/become-member" className="HeroCTA HeroCTA--primary">Become a Member</a>
+            <a href="/meet-the-board" className="HeroCTA HeroCTA--primary">Meet the Board</a>
             <a href="/sessions" className="HeroCTA HeroCTA--ghost">Explore Sessions</a>
           </div>
         </div>

@@ -1,6 +1,5 @@
 import React, { memo, useMemo, useState } from 'react';
 import './PageBase.css';
-import DomeGallery from '../components/Dome';
 import BoardHeader from './Board/BoardHeader';
 import ProfileCard from '../components/ProfileCard';
 import DepartmentMenu from './Board/DepartmentMenu';
@@ -177,13 +176,6 @@ const Board = memo(() => {
             </div>
           ))}
         </div>
-      </section>
-      <section className="BoardGallery">
-        <div className="BoardGallery__head">
-          <h2 className="BoardGallery__title">Gallery</h2>
-          <p className="BoardGallery__subtitle">Moments from our journey together</p>
-        </div>
-        <DomeGallery />
       </section>
     </section>
   );
