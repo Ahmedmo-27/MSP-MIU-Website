@@ -1,2 +1,2 @@
- .PageBase { padding: 2rem 0 1rem; color:#fff; }
+ .PageBase { padding: 2rem 0 1rem; color:#fff; min-height: 80vh; }
  .PageBase h1 { margin:0 0 1rem; font-size:2rem; letter-spacing:.5px; background:linear-gradient(90deg,#0077CC,#03A9F4); -webkit-background-clip:text; background-clip:text; color:transparent; }

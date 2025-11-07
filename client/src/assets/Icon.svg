@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Left angle bracket "<" -->
+  <path d="M22 20 L12 32 L22 44" fill="none" stroke="#0f172a" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- Slash "/" -->
+  <path d="M28 18 L36 46" fill="none" stroke="#06b6d4" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- Right angle bracket ">" -->
+  <path d="M42 20 L52 32 L42 44" fill="none" stroke="#0f172a" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

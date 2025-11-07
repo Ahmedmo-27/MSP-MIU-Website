@@ -53,7 +53,7 @@ const AppRouter = () => (
       <Routes>
         <Route path="/" element={<SiteLayout><Home /></SiteLayout>} />
         <Route path="/about" element={<SiteLayout><AboutUs /></SiteLayout>} />
-        <Route path="/board" element={<SiteLayout><Board /></SiteLayout>} />
+        <Route path="/Meet-the-board" element={<SiteLayout><Board /></SiteLayout>} />
         <Route path="/become-member" element={<SiteLayout><BecomeMember /></SiteLayout>} />
         <Route path="/login" element={<SiteLayout><Login /></SiteLayout>} />
         <Route path="/exercises" element={<SiteLayout><Exercises /></SiteLayout>} />

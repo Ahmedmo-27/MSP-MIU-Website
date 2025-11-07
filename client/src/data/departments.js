@@ -6,6 +6,9 @@ export const departments = [
   { id: 4, name: 'Public Relations' },
   { id: 5, name: 'Human Resources' },
   { id: 6, name: 'Event Planning' },
+  { id: 7, name: 'Vice President' },
+  { id: 8, name: 'President' },
+  { id: 9, name: 'Founder' },
 ];
 
 // Helper functions

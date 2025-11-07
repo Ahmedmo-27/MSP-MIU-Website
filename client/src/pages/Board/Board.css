@@ -1,0 +1,252 @@
+/* Department Menu */
+.DepartmentMenu {
+  padding: 30px 0 40px;
+  position: relative;
+}
+
+.DepartmentMenu__container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+}
+
+.DepartmentMenu__button {
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  color: #8EC2F0;
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.DepartmentMenu__button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(3, 169, 244, 0.4);
+  color: #03A9F4;
+}
+
+.DepartmentMenu__button--active {
+  background: linear-gradient(135deg, rgba(0, 119, 204, 0.4), rgba(3, 169, 244, 0.3));
+  border-color: rgba(3, 169, 244, 0.6);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(3, 169, 244, 0.2);
+}
+
+/* Board Header */
+.BoardHeader {
+  padding: 60px 0 40px;
+  text-align: center;
+  position: relative;
+}
+
+.BoardHeader__content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.BoardHeader__title {
+  margin: 0 0 16px;
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, #8EC2F0, #03A9F4);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.BoardHeader__subtitle {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #8EC2F0;
+  line-height: 1.6;
+  letter-spacing: 0.3px;
+}
+
+
+/* Board Members Section */
+.BoardMembers {
+  padding: 40px 0 80px;
+}
+
+.BoardMembers__head {
+  max-width: 1200px;
+  margin: 0 auto 50px;
+  padding: 0 24px;
+  text-align: center;
+}
+
+.BoardMembers__title {
+  margin: 0 0 12px;
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, #8EC2F0, #03A9F4);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.BoardMembers__subtitle {
+  margin: 0;
+  font-size: 1rem;
+  color: #8EC2F0;
+  letter-spacing: 0.3px;
+}
+
+.BoardMembers__grid {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 64px;
+}
+
+.BoardMembers__department-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+}
+
+.BoardMembers__card {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.BoardMembers__card--animate {
+  animation: cardFadeIn 0.5s ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes cardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.BoardMembers__card--head {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.BoardMembers__card--cohead {
+  width: 100%;
+}
+
+/* Container for co-heads to display them in a row */
+.BoardMembers__coheads-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 32px;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.BoardMembers__grid .pc-card-wrapper {
+  width: 100%;
+  max-width: 400px;
+}
+
+.BoardMembers__grid .pc-card {
+  height: auto;
+  max-height: 500px;
+  aspect-ratio: 0.718;
+  background: rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.BoardMembers__grid .pc-card:hover,
+.BoardMembers__grid .pc-card.active {
+  transform: translateZ(0) rotateX(0deg) rotateY(0deg) !important;
+  transition: transform 1s ease !important;
+}
+
+.BoardMembers__grid .pc-inside {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.BoardMembers__grid .pc-details h3 {
+  color: #fff;
+  background: linear-gradient(135deg, #8EC2F0, #03A9F4);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.BoardMembers__grid .pc-details p {
+  color: #8EC2F0;
+}
+
+/* Board Gallery Section */
+.BoardGallery {
+  padding: 60px 0 80px;
+}
+
+.BoardGallery__head {
+  max-width: 1400px;
+  margin: 0 auto 40px;
+  padding: 0 24px;
+  text-align: center;
+}
+
+.BoardGallery__title {
+  margin: 0 0 12px;
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, #8EC2F0, #03A9F4);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.BoardGallery__subtitle {
+  margin: 0;
+  font-size: 1rem;
+  color: #8EC2F0;
+  letter-spacing: 0.3px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .BoardHeader__title {
+    font-size: 2rem;
+  }
+
+  .BoardMembers__grid {
+    gap: 48px;
+  }
+
+  .BoardMembers__department-group {
+    gap: 24px;
+  }
+
+  .BoardMembers__coheads-container {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .BoardStats__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
