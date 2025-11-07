@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaHome, FaSignInAlt, FaCalendarAlt } from 'react-icons/fa';
+import { FaHome, FaSignInAlt, FaCalendarAlt, FaUsers } from 'react-icons/fa';
 import { MdGroups } from 'react-icons/md';
 import './Navbar.css';
 import LoginCard from '../../components/LoginCard';
@@ -11,7 +11,7 @@ import mspLogo from '../../assets/Images/msp-logo.png';
 const links = [
   { to: '/', label: 'Home', icon: <FaHome /> },
   { to: '/about', label: 'About Us', icon: <MdGroups /> },
-  // { to: '/board', label: 'Meet the Board', icon: <FaUsers /> },
+  { to: '/Meet-the-board', label: 'Meet the Board', icon: <FaUsers /> },
   // { to: '/become-member', label: 'Become a Member', icon: <FaUserPlus /> },
   { to: '/login', label: 'Login', icon: <FaSignInAlt /> },
   // // { to: '/exercises', label: 'Exercises', icon: <FaDumbbell /> },
