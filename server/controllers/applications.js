@@ -98,11 +98,11 @@ const getAllApplications = async (req, res) => {
         const whereClause = {};
         
         if (first_choice) {
-            whereClause.first_choice = first_choice;
+            whereClause.first_choice = parseInt(first_choice);
         }
         
         if (second_choice) {
-            whereClause.second_choice = second_choice;
+            whereClause.second_choice = parseInt(second_choice);
         }
         
         if (status) {
