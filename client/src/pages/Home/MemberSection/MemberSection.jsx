@@ -24,25 +24,24 @@ const MemberSection = memo(({ isMember = false }) => {
 
   // Memoize animation props to prevent recreation
   const cardHoverAnimation = useMemo(() => ({ y: -8 }), []);
-  const cardTransition = useMemo(() => ({ type: 'spring', stiffness: 380, damping: 28 }), []);
-
+  
   return (
     <section className="MemberDash" aria-labelledby="member-dash-heading">
       <div className="MemberDash__head"><h2 id="member-dash-heading" className="MemberDash__title">Your Dashboard</h2></div>
       <div className="MemberDash__grid">
-        <motion.div className="DashCard" whileHover={cardHoverAnimation} transition={cardTransition}>
+        <motion.div className="DashCard" whileHover={cardHoverAnimation}>
           <h3 className="DashCard__title">Registered Events</h3>
           <ul className="DashList">
             {registered.map(r => <li key={r.id} className="DashList__item"><span>{r.title}</span><time>{r.date}</time></li>)}
           </ul>
         </motion.div>
-        <motion.div className="DashCard" whileHover={cardHoverAnimation} transition={cardTransition}>
+        <motion.div className="DashCard" whileHover={cardHoverAnimation}>
           <h3 className="DashCard__title">Exercise Reminders</h3>
           <ul className="DashList">
             {exercises.map(e => <li key={e.id} className="DashList__item"><span>{e.title}</span><em>{e.due}</em></li>)}
           </ul>
         </motion.div>
-        <motion.div className="DashCard" whileHover={cardHoverAnimation} transition={cardTransition}>
+        <motion.div className="DashCard" whileHover={cardHoverAnimation}>
           <div className="DashCard__titleWrap">
             <h3 className="DashCard__title">Notifications</h3>
             <motion.div className="Bell">

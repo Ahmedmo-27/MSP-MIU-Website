@@ -6,19 +6,10 @@
 .text-type__cursor {
   margin-left: 0.25rem;
   display: inline-block;
-  opacity: 1;
+  animation: cursorBlink 0.5s ease-in-out infinite;
 }
 
-.text-type__cursor--hidden {
-  display: none;
-}
-
-/* CSS animation to replace GSAP cursor blinking */
 @keyframes cursorBlink {
-  0%, 50% {
-    opacity: 1;
-  }
-  51%, 100% {
-    opacity: 0;
-  }
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
 }

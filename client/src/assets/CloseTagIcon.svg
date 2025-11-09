@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 64" width="80" height="64">
+  <!-- Left angle bracket "<" -->
+  <path d="M8 20 L20 32 L8 44" fill="white" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- Slash "/" -->
+  <line x1="28" y1="12" x2="36" y2="52" stroke="white" stroke-width="4" stroke-linecap="round" />
+  
+  <!-- Right angle bracket ">" -->
+  <path d="M44 20 L56 32 L44 44" fill="white" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+</svg>
+

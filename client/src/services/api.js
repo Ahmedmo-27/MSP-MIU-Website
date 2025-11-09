@@ -139,9 +139,21 @@ class ApiService {
   }
 
 
-  static async getAllApplications() {
+  static async getAllApplications(filters = {}) {
     try {
-      const cacheKey = getCacheKey(`${API_BASE_URL}/applications`);
+      // Build query string from filters
+      const queryParams = new URLSearchParams();
+      if (filters.first_choice) queryParams.append('first_choice', filters.first_choice);
+      if (filters.second_choice) queryParams.append('second_choice', filters.second_choice);
+      if (filters.status) queryParams.append('status', filters.status);
+      if (filters.faculty) queryParams.append('faculty', filters.faculty);
+      if (filters.year) queryParams.append('year', filters.year);
+      if (filters.search) queryParams.append('search', filters.search);
+      
+      const queryString = queryParams.toString();
+      const url = `${API_BASE_URL}/applications${queryString ? `?${queryString}` : ''}`;
+      
+      const cacheKey = getCacheKey(url, filters);
       const cachedData = getCachedData(cacheKey);
       
       if (cachedData) {
@@ -149,9 +161,9 @@ class ApiService {
         return cachedData;
       }
 
-      const response = await fetch(`${API_BASE_URL}/applications`, {
+      const response = await fetch(url, {
         method: 'GET',
-        headers: this.getHeaders(true), // Include auth token for admin access
+        headers: this.getHeaders(false), // No auth token required for now
       });
       
       const result = await response.json();
