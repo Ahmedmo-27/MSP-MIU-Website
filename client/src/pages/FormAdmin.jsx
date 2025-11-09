@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef, useMemo } from "react";
+import React, { useEffect, useState, useCallback, useRef, memo } from "react";
 import ApiService from "../services/api";
 import { getDepartmentNameById } from "../data/departments";
 
@@ -10,7 +10,7 @@ import ChartsSection from "../components/ChartsSection";
 import FiltersSection from "../components/FiltersSection";
 import ApplicationsTable from "../components/ApplicationsTable";
 
-const FormAdmin = () => {
+const FormAdmin = memo(() => {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isFiltering, setIsFiltering] = useState(false);
@@ -442,6 +442,7 @@ const FormAdmin = () => {
       </p>
     </div>
   );
-};
+});
+FormAdmin.displayName = 'FormAdmin';
 
 export default FormAdmin;

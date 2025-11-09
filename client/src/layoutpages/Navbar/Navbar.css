@@ -1,0 +1,276 @@
+/* Simplified direct-link navbar */
+:root {
+    --nav-height: 70px;
+}
+
+.Navbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+    background: rgba(3, 28, 53, 0.78);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    transition: background .2s ease, box-shadow .2s ease;
+}
+
+.Navbar--scrolled {
+    background: rgba(3, 28, 53, 0.9);
+    box-shadow: 0 4px 26px -6px rgba(0, 0, 0, 0.55);
+}
+
+.Navbar__inner {
+    max-width: 1500px;
+    margin: 0 auto;
+    height: var(--nav-height);
+    display: flex;
+    align-items: center;
+    gap: 1.75rem;
+    padding: 0 1.25rem;
+}
+
+.Navbar__brand {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    font-weight: 600;
+}
+
+.Navbar__logoMark {
+    background: linear-gradient(135deg, #0077CC, #03A9F4);
+    /* Include standard property before vendor prefix for lint compliance */
+    background-clip: text;
+    -webkit-background-clip: text;
+     z-index: 1000;
+    color: transparent;
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: .5px;
+}
+
+.Navbar__logoText {
+    color: #8EC2F0;
+    font-size: .9rem;
+     z-index: 900;
+}
+
+.Navbar__links {
+    justify-content: center;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 10rem;
+    flex: 1;
+}
+
+.NavItem {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    text-decoration: none;
+    color: #8EC2F0;
+    font-size: .74rem;
+    font-weight: 500;
+    letter-spacing: .35px;
+    padding: .55rem .7rem;
+    border-radius: 10px;
+}
+
+.NavItem__icon {
+    display: flex;
+    align-items: center;
+    font-size: .9rem;
+    opacity: .95;
+}
+
+.NavItem:hover {
+    background: rgba(0, 119, 204, 0.22);
+    color: #fff;
+    transform: scale(1.05);
+}
+
+.NavItem.is-active {
+    background: linear-gradient(135deg, rgba(0, 119, 204, 0.28), rgba(3, 169, 244, 0.28));
+    color: #fff;
+}
+
+.NavItem.is-active:before {
+    content: "";
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: 4px;
+    height: 2px;
+    background: linear-gradient(90deg, #0077CC, #03A9F4);
+    border-radius: 4px;
+}
+
+/* Hamburger */
+.NavHamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    justify-content: center;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+}
+
+
+.NavHamburger span {
+    width: 55%;
+    height: 2px;
+    background: #fff;
+    border-radius: 3px;
+    transition: transform .3s ease, opacity .3s ease;
+}
+
+.NavHamburger.is-open span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+}
+
+.NavHamburger.is-open span:nth-child(2) {
+    opacity: 0;
+}
+
+.NavHamburger.is-open span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+}
+
+/* Mobile Drawer */
+.NavDrawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: min(340px, 85%);
+    background: linear-gradient(165deg, #0D3159, #031C35 70%);
+    box-shadow: -10px 0 28px -6px rgba(0, 0, 0, 0.65);
+    padding: 1.4rem 1.1rem 2rem;
+    display: flex;
+    flex-direction: column;
+    /* Elevated above navbar (1000) and overlay (1500) for guaranteed visibility */
+    z-index: 2000;
+    border-left: 1px solid rgba(255, 255, 255, 0.12);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    /* Ensure proper stacking context */
+    isolation: isolate;
+}
+
+.NavDrawer__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+    overflow-y: auto;
+}
+
+.NavDrawer__link {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    text-decoration: none;
+    color: #8EC2F0;
+    font-size: .95rem;
+    font-weight: 500;
+    letter-spacing: .4px;
+    padding: .85rem .85rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    transition: background .2s, color .2s;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+}
+
+.NavDrawer__link.is-active {
+    background: linear-gradient(135deg, rgba(0, 119, 204, 0.35), rgba(3, 169, 244, 0.35));
+    color: #fff;
+}
+
+.NavDrawer__icon {
+    font-size: 1.05rem;
+    display: flex;
+}
+
+.NavDrawer__label {
+    flex: 1;
+}
+
+/* Login Button Styles */
+.login-nav-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    text-align: left;
+}
+
+.login-nav-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(3, 169, 244, .45);
+}
+
+.NavOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    /* Ensure overlay sits above site content but below the drawer */
+    z-index: 1500;
+    border: none;
+    cursor: pointer;
+    /* Ensure proper stacking context */
+    isolation: isolate;
+    /* Prevent any potential pointer events issues */
+    pointer-events: auto;
+}
+
+@media (max-width:1450px) {
+    .NavItem {
+        font-size: .68rem;
+        padding: .5rem .55rem;
+    }
+
+    .Navbar__inner {
+        gap: 1.2rem;
+    }
+}
+
+@media (max-width:1180px) {
+    .Navbar__links {
+        display: none;
+    }
+
+    .NavHamburger {
+        display: flex;
+        margin-left: auto;
+    }
+}
+
+@media (max-width:680px) {
+    .Navbar__inner {
+        padding: 0 .85rem;
+    }
+
+    .Navbar__logoMark {
+        font-size: 1rem;
+    }
+
+    .Navbar__logoText {
+        font-size: .78rem;
+    }
+}

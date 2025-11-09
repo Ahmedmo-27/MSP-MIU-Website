@@ -1,9 +1,10 @@
-import React, { useMemo, useState, useEffect } from 'react'
+import React, { useMemo, useState, useEffect, memo, useCallback } from 'react'
 import miuLogo from './assets/Images/miu-logo.png'
 import mspLogo from './assets/Images/msp-logo.png'
 import ApiService from './services/api'
 import { departments, getDepartmentIdByName } from './data/departments'
 
+// Memoized constants to prevent recreation
 const palette = {
   orange: '#F4581F',
   green: '#83BD00',
@@ -41,9 +42,10 @@ const years = [
 
 // Departments are now imported from data/departments.js
 
-function Stepper({ step }) {
-  const items = [0,1,2,3,4]
-  const percent = Math.min(100, Math.max(0, (step/(items.length-1))*100))
+const Stepper = memo(({ step }) => {
+  const items = useMemo(() => [0,1,2,3,4], []);
+  const percent = useMemo(() => Math.min(100, Math.max(0, (step/(items.length-1))*100)), [step, items.length]);
+  
   return (
     <div className="stepper stepper-wrap">
       <div className="stepper-track" />
@@ -56,9 +58,11 @@ function Stepper({ step }) {
       ))}
     </div>
   )
-}
+});
 
-function App() {
+Stepper.displayName = 'Stepper';
+
+const App = memo(() => {
   const totalSteps = 6 // 5 form steps + review
   const [screen, setScreen] = useState('welcome')
   const [step, setStep] = useState(0)
@@ -80,12 +84,13 @@ function App() {
 
   const [errors, setErrors] = useState({})
 
-  const canGoBack = step > 0
-  const canGoNext = step < totalSteps - 1
+  // Memoize computed values
+  const canGoBack = useMemo(() => step > 0, [step]);
+  const canGoNext = useMemo(() => step < totalSteps - 1, [step, totalSteps]);
 
-  function updateField(key, value) {
+  const updateField = useCallback((key, value) => {
     setForm(prev => ({ ...prev, [key]: value }))
-  }
+  }, []);
 
   // When faculty changes, if current departments are not allowed for the selected faculty, clear them
   useEffect(() => {
@@ -175,9 +180,26 @@ function App() {
       setScreen('success')
     } catch (error) {
       console.error('Failed to submit application:', error);
-      // Show server-provided message where available
-      const msg = error.message || (error && error.error) || 'Failed to submit application. Please try again.';
-      alert(msg);
+      
+      // Handle specific error types
+      let errorMessage = 'Failed to submit application. Please try again.';
+      
+      if (error.message) {
+        if (error.message.includes('duplicate') || error.message.includes('already exists')) {
+          errorMessage = 'An application with this email or student ID already exists.';
+        } else if (error.message.includes('validation') || error.message.includes('invalid')) {
+          errorMessage = 'Please check your information and try again.';
+        } else if (error.message.includes('Network') || error.message.includes('fetch')) {
+          errorMessage = 'Network error. Please check your connection and try again.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      // Show error message
+      alert(errorMessage);
+      
+      // Don't reset the form on error, let user fix the issues
     } finally {
       setSubmitting(false)
     }
@@ -384,7 +406,24 @@ function App() {
               <button type="button" className="btn" onClick={() => { if (validateCurrentStep()) setStep(5) }}>Review</button>
             )}
             {step === 5 && (
-              <button type="submit" disabled={submitting} className="btn primary">{submitting ? 'Submitting…' : 'Submit'}</button>
+              <button type="submit" disabled={submitting} className="btn primary">
+                {submitting ? (
+                  <>
+                    <span style={{ display: 'inline-block', marginRight: '8px' }}>
+                      <div style={{
+                        width: '16px',
+                        height: '16px',
+                        border: '2px solid rgba(255,255,255,0.3)',
+                        borderTop: '2px solid white',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite',
+                        display: 'inline-block'
+                      }} />
+                    </span>
+                    Submitting…
+                  </>
+                ) : 'Submit'}
+              </button>
             )}
           </div>
         </form>
@@ -432,6 +471,8 @@ function App() {
       )}
     </div>
   )
-}
+});
+
+App.displayName = 'App';
 
 export default App

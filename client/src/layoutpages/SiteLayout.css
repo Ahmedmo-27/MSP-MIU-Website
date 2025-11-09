@@ -1,0 +1,44 @@
+/* SiteLayout.css */
+.SiteLayout {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(135deg, var(--navy-900, #031C35), var(--navy-700, #1D4F82));
+}
+
+.SiteLayout__main {
+    flex: 1;
+    width: 100%;
+    min-height: 60vh;
+}
+
+/* Background augmentations for a subtle futuristic grid overlay */
+.SiteLayout:before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+        repeating-linear-gradient(0deg, rgba(180, 220, 255, 0.04) 0 1px, transparent 1px 46px),
+        repeating-linear-gradient(90deg, rgba(180, 220, 255, 0.04) 0 1px, transparent 1px 46px);
+    z-index: 0;
+}
+
+.SiteLayout:after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(420px 320px at 14% 22%, rgba(0, 119, 204, 0.18), transparent 70%),
+        radial-gradient(360px 280px at 82% 76%, rgba(3, 169, 244, 0.16), transparent 70%),
+        radial-gradient(200px 200px at 90% 14%, rgba(255, 193, 7, 0.12), transparent 70%);
+    z-index: 0;
+}
+
+.Navbar,
+.SiteLayout__main,
+.Footer {
+    position: relative;
+    z-index: 2;
+}
