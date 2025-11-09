@@ -89,6 +89,15 @@ Member.hasMany(Attendance, {
 });
 
 // User associations
+User.belongsTo(Department, {
+  foreignKey: 'department_id',
+  as: 'department',
+  allowNull: true
+});
+Department.hasMany(User, {
+  foreignKey: 'department_id',
+  as: 'users'
+});
 User.hasMany(Member, {
   foreignKey: 'user_id',
   as: 'member'

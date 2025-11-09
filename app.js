@@ -16,6 +16,9 @@ const apiRoutes = require("./server/server");
 // API routes
 app.use("/api", apiRoutes);
 
+// Serve uploaded files (profile pictures, etc.)
+app.use("/uploads", express.static(path.join(__dirname, "server/uploads")));
+
 // Serve static files from the React app build directory
 app.use(express.static(path.join(__dirname, "client/public")));
 

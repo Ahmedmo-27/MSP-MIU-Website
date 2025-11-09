@@ -2,30 +2,24 @@ import { useState, useEffect, useCallback, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaHome, FaSignInAlt, FaCalendarAlt, FaUsers } from 'react-icons/fa';
+import { FaHome, FaSignInAlt, FaCalendarAlt, FaUsers, FaUser } from 'react-icons/fa';
 import { MdGroups } from 'react-icons/md';
 import './Navbar.css';
 import LoginCard from '../../components/LoginCard';
+import ApiService from '../../services/api';
 import mspLogo from '../../assets/Images/msp-logo.png';
-
-const links = [
-  { to: '/', label: 'Home', icon: <FaHome /> },
-  { to: '/about', label: 'About Us', icon: <MdGroups /> },
-  { to: '/Meet-the-board', label: 'Meet the Board', icon: <FaUsers /> },
-  // { to: '/become-member', label: 'Become a Member', icon: <FaUserPlus /> },
-  { to: '/login', label: 'Login', icon: <FaSignInAlt /> },
-  // // { to: '/exercises', label: 'Exercises', icon: <FaDumbbell /> },
-  { to: '/events', label: 'Events', icon: <FaCalendarAlt /> },
-  // { to: '/suggestions', label: 'Suggestions', icon: <FaLightbulb /> },
-  // { to: '/leaderboard', label: 'Leaderboard', icon: <FaTrophy /> },
-  // { to: '/sponsors', label: 'Sponsors', icon: <FaHandshake /> }
-];
 
 const Navbar = memo(() => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showLoginCard, setShowLoginCard] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const location = useLocation();
+
+  // Check authentication status
+  useEffect(() => {
+    setIsAuthenticated(ApiService.isAuthenticated());
+  }, [location.pathname]);
 
   useEffect(() => { 
     document.body.style.overflow = mobileOpen ? 'hidden' : ''; 
@@ -53,7 +47,37 @@ const Navbar = memo(() => {
     closeMobile();
   }, [closeMobile]);
   
-  const closeLoginCard = useCallback(() => setShowLoginCard(false), []);
+  const closeLoginCard = useCallback(() => {
+    setShowLoginCard(false);
+    // Check auth status after closing login card (user might have logged in)
+    setTimeout(() => {
+      setIsAuthenticated(ApiService.isAuthenticated());
+    }, 100);
+  }, []);
+  
+  // Get navigation links based on authentication status
+  const getLinks = useCallback(() => {
+    const baseLinks = [
+      { to: '/', label: 'Home', icon: <FaHome /> },
+      { to: '/about', label: 'About Us', icon: <MdGroups /> },
+      { to: '/Meet-the-board', label: 'Meet the Board', icon: <FaUsers /> },
+      // { to: '/become-member', label: 'Become a Member', icon: <FaUserPlus /> },
+      // // { to: '/exercises', label: 'Exercises', icon: <FaDumbbell /> },
+      { to: '/events', label: 'Events', icon: <FaCalendarAlt /> },
+      // { to: '/suggestions', label: 'Suggestions', icon: <FaLightbulb /> },
+      // { to: '/leaderboard', label: 'Leaderboard', icon: <FaTrophy /> },
+      // { to: '/sponsors', label: 'Sponsors', icon: <FaHandshake /> }
+    ];
+    
+    // Add Login or Profile based on authentication status
+    if (isAuthenticated) {
+      baseLinks.push({ to: '/profile', label: 'Profile', icon: <FaUser /> });
+    } else {
+      baseLinks.push({ to: '/login', label: 'Login', icon: <FaSignInAlt /> });
+    }
+    
+    return baseLinks;
+  }, [isAuthenticated]);
 
   useEffect(() => {
     const handleEscape = (e) => {
@@ -81,9 +105,9 @@ const Navbar = memo(() => {
           <div className="Navbar__logoText">Tech Club</div>
         </NavLink>
         <ul className="Navbar__links">
-          {links.map(l => (
+          {getLinks().map(l => (
             <li key={l.to}>
-              {l.to === '/login' ? (
+              {!isAuthenticated && l.to === '/login' ? (
                 <button
                   onClick={handleLoginClick}
                   className="NavItem login-nav-button"
@@ -141,9 +165,9 @@ const Navbar = memo(() => {
                 }}
               >
                 <ul className="NavDrawer__list">
-                  {links.map(l => (
+                  {getLinks().map(l => (
                     <li key={l.to}>
-                      {l.to === '/login' ? (
+                      {!isAuthenticated && l.to === '/login' ? (
                         <button
                           onClick={(e) => {
                             e.preventDefault();
