@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { registerUser, loginUser, logoutUser, getProfile, updateProfile, addScore } = require("../controllers/user");
 const { authenticateToken, verifyRole } = require("../middlewares/auth");
-const upload = require("../utils/upload");
+const { upload } = require("../utils/upload");
 
 // Public routes
 router.post("/register", registerUser);

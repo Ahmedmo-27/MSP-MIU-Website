@@ -7,9 +7,10 @@ const jwt = require('jsonwebtoken');
 
 /**
  * Validate JWT secret is properly set and meets security requirements
+ * @param {boolean} strict - If false, allows shorter secrets (for backward compatibility)
  * @returns {Object} - { valid: boolean, secret: string, error?: string }
  */
-const validateJWTSecret = () => {
+const validateJWTSecret = (strict = true) => {
     const secret = process.env.JWT_SECRET;
 
     if (!secret) {
@@ -29,21 +30,37 @@ const validateJWTSecret = () => {
     }
 
     // Minimum length requirement for security (at least 32 characters)
-    if (secret.length < 32) {
+    // In strict mode, enforce 32 chars. In non-strict mode, allow 16+ chars as minimum
+    const minLength = strict ? 32 : 16;
+    if (secret.length < minLength) {
         return {
             valid: false,
             secret: null,
-            error: 'JWT_SECRET must be at least 32 characters long for security'
+            error: `JWT_SECRET must be at least ${minLength} characters long for security (current: ${secret.length})`
         };
     }
 
-    // Check for common weak secrets
-    const weakSecrets = ['secret', 'password', '123456', 'jwt_secret', 'changeme'];
-    if (weakSecrets.some(weak => secret.toLowerCase().includes(weak))) {
+    // Check for common weak secrets (exact matches only, not substrings)
+    // This prevents flagging valid secrets that happen to contain these words
+    const weakSecrets = ['secret', 'password', '123456', 'jwt_secret', 'changeme', 'test', 'default'];
+    const secretLower = secret.toLowerCase().trim();
+    
+    // Only flag if it's an exact match to a known weak secret
+    if (weakSecrets.includes(secretLower)) {
         return {
             valid: false,
             secret: null,
-            error: 'JWT_SECRET appears to be weak or default value'
+            error: 'JWT_SECRET appears to be a weak or default value'
+        };
+    }
+    
+    // Check if secret is just a repetition of a single character (too predictable)
+    // Only check if secret is long enough for this pattern to be meaningful
+    if (secret.length >= 32 && secretLower.match(/^(.)\1{31,}$/)) {
+        return {
+            valid: false,
+            secret: null,
+            error: 'JWT_SECRET appears to be too simple or predictable'
         };
     }
 
@@ -82,13 +99,28 @@ const getJWTExpiration = () => {
  */
 const generateToken = (payload) => {
     try {
-        // Validate JWT secret
-        const secretValidation = validateJWTSecret();
-        if (!secretValidation.valid) {
+        // Get JWT secret from environment
+        const secret = process.env.JWT_SECRET;
+        if (!secret) {
             return {
                 success: false,
-                error: secretValidation.error
+                error: 'JWT_SECRET environment variable is not set'
             };
+        }
+
+        // Validate JWT secret - use non-strict mode for backward compatibility
+        // This allows existing deployments with shorter secrets to continue working
+        const secretValidation = validateJWTSecret(false);
+        if (!secretValidation.valid) {
+            // If validation fails, check if we can still use it (minimum 16 chars for backward compatibility)
+            if (secret.length < 16) {
+                return {
+                    success: false,
+                    error: secretValidation.error
+                };
+            }
+            // Log warning but continue for backward compatibility
+            console.warn(`[JWT] Secret validation warning: ${secretValidation.error}. Using secret anyway for backward compatibility.`);
         }
 
         // Validate payload
@@ -102,10 +134,10 @@ const generateToken = (payload) => {
         // Get expiration time
         const expiresIn = getJWTExpiration();
 
-        // Generate token
+        // Generate token using the secret (either validated or from env)
         const token = jwt.sign(
             payload,
-            secretValidation.secret,
+            secret,
             { expiresIn }
         );
 
@@ -128,13 +160,27 @@ const generateToken = (payload) => {
  */
 const verifyToken = (token) => {
     try {
-        // Validate JWT secret
-        const secretValidation = validateJWTSecret();
-        if (!secretValidation.valid) {
+        // Validate JWT secret - use non-strict mode for backward compatibility
+        const secretValidation = validateJWTSecret(false);
+        const secret = process.env.JWT_SECRET;
+        
+        if (!secret) {
             return {
                 success: false,
-                error: secretValidation.error
+                error: 'JWT_SECRET environment variable is not set'
             };
+        }
+        
+        // If validation fails but secret exists and is at least 16 chars, use it anyway
+        if (!secretValidation.valid) {
+            if (secret.length < 16) {
+                return {
+                    success: false,
+                    error: secretValidation.error
+                };
+            }
+            // Log warning but continue for backward compatibility
+            console.warn(`[JWT] Secret validation warning: ${secretValidation.error}. Using secret anyway.`);
         }
 
         if (!token || typeof token !== 'string') {
@@ -144,8 +190,9 @@ const verifyToken = (token) => {
             };
         }
 
-        // Verify token
-        const decoded = jwt.verify(token, secretValidation.secret);
+        // Verify token - use validated secret or fall back to process.env.JWT_SECRET
+        const secretToUse = secretValidation.valid ? secretValidation.secret : secret;
+        const decoded = jwt.verify(token, secretToUse);
         return {
             success: true,
             decoded

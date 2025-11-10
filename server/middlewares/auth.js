@@ -8,9 +8,22 @@ const { logError, logSecurityEvent } = require('../utils/logger');
  */
 const authenticateToken = async (req, res, next) => {
     try {
-        // Validate JWT secret on first use
-        const secretValidation = validateJWTSecret();
-        if (!secretValidation.valid) {
+        // Check if JWT_SECRET exists (required)
+        const secret = process.env.JWT_SECRET;
+        if (!secret) {
+            logSecurityEvent('AUTH_CONFIG_ERROR', {
+                reason: 'JWT_SECRET is not set'
+            }, req);
+            
+            return res.status(500).json({
+                success: false,
+                error: 'Authentication service configuration error'
+            });
+        }
+        
+        // Validate JWT secret (non-strict mode for backward compatibility)
+        const secretValidation = validateJWTSecret(false);
+        if (!secretValidation.valid && secret.length < 16) {
             logSecurityEvent('AUTH_CONFIG_ERROR', {
                 reason: 'JWT_SECRET validation failed',
                 error: secretValidation.error
@@ -158,10 +171,20 @@ const verifyRole = (...roles) => {
  */
 const optionalAuth = async (req, res, next) => {
     try {
-        // Validate JWT secret first
-        const secretValidation = validateJWTSecret();
-        if (!secretValidation.valid) {
+        // Check if JWT_SECRET exists
+        const secret = process.env.JWT_SECRET;
+        if (!secret) {
             // Log but don't block - this is optional auth
+            logSecurityEvent('OPTIONAL_AUTH_CONFIG_ERROR', {
+                reason: 'JWT_SECRET is not set'
+            }, req);
+            return next();
+        }
+        
+        // Validate JWT secret (non-strict mode)
+        const secretValidation = validateJWTSecret(false);
+        // Don't block even if validation fails - just log it
+        if (!secretValidation.valid && secret.length < 16) {
             logSecurityEvent('OPTIONAL_AUTH_CONFIG_ERROR', {
                 reason: 'JWT_SECRET validation failed',
                 error: secretValidation.error
