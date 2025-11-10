@@ -40,10 +40,12 @@ const sanitizeError = (error) => {
  * @returns {string} - Client IP address
  */
 const getClientIp = (req) => {
+    if (!req) return 'unknown';
+    
     return req.ip || 
-           req.connection?.remoteAddress || 
-           req.socket?.remoteAddress ||
-           (req.headers['x-forwarded-for'] || '').split(',')[0]?.trim() ||
+           (req.connection && req.connection.remoteAddress) || 
+           (req.socket && req.socket.remoteAddress) ||
+           (req.headers && req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : null) ||
            'unknown';
 };
 
@@ -56,7 +58,7 @@ const getClientIp = (req) => {
 const logAuditEvent = (event, details = {}, req = null) => {
     const timestamp = new Date().toISOString();
     const clientIp = req ? getClientIp(req) : 'unknown';
-    const userAgent = req?.headers['user-agent'] || 'unknown';
+    const userAgent = (req && req.headers && req.headers['user-agent']) ? req.headers['user-agent'] : 'unknown';
 
     const auditLog = {
         timestamp,

@@ -1,14 +1,15 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const bodyParser = require("body-parser");
 const path = require("path");
 const PORT = process.env.PORT;
 
 const app = express();
 
 app.use(cors());
-app.use(bodyParser.json());
+// Use Express built-in JSON parser instead of body-parser (removes util._extend deprecation warning)
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Import API routes from server
 const apiRoutes = require("./server/server");
