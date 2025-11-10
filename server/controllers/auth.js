@@ -1,28 +1,31 @@
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 const { User } = require('../models');
-
-/**
- * Generate JWT token
- */
-const generateToken = (userId, role) => {
-    return jwt.sign(
-        { userId, role },
-        process.env.JWT_SECRET,
-        { expiresIn: process.env.JWT_EXPIRES_IN }
-    );
-};
+const { generateToken: generateJWTToken } = require('../utils/jwt');
+const { logAuditEvent, logError, logSecurityEvent } = require('../utils/logger');
 
 /**
  * Login user
  * POST /api/auth/login
  */
 const login = async (req, res) => {
+    const startTime = Date.now();
+    let loginAttempt = {
+        university_id: req.body?.university_id || 'unknown',
+        success: false,
+        error_type: null
+    };
+
     try {
         const { university_id, password } = req.body;
 
         // Validation
         if (!university_id || !password) {
+            loginAttempt.error_type = 'MISSING_CREDENTIALS';
+            logAuditEvent('LOGIN_FAILURE', {
+                reason: 'Missing credentials',
+                university_id: university_id || 'not_provided'
+            }, req);
+            
             return res.status(400).json({
                 success: false,
                 error: 'University ID and password are required'
@@ -32,6 +35,12 @@ const login = async (req, res) => {
         // Validate university ID format (xxxx/xxxxx)
         const universityIdRegex = /^\d{4}\/\d{5}$/;
         if (!universityIdRegex.test(university_id)) {
+            loginAttempt.error_type = 'INVALID_FORMAT';
+            logAuditEvent('LOGIN_FAILURE', {
+                reason: 'Invalid university ID format',
+                university_id
+            }, req);
+            
             return res.status(400).json({
                 success: false,
                 error: 'Invalid university ID format. Expected format: xxxx/xxxxx (e.g. 20xx/xxxxx)'
@@ -42,6 +51,12 @@ const login = async (req, res) => {
         const user = await User.findOne({ where: { university_id } });
 
         if (!user) {
+            loginAttempt.error_type = 'USER_NOT_FOUND';
+            logAuditEvent('LOGIN_FAILURE', {
+                reason: 'User not found',
+                university_id
+            }, req);
+            
             return res.status(401).json({
                 success: false,
                 error: 'Invalid credentials'
@@ -50,6 +65,14 @@ const login = async (req, res) => {
 
         // Check if user is active
         if (!user.is_active) {
+            loginAttempt.error_type = 'ACCOUNT_INACTIVE';
+            loginAttempt.user_id = user.user_id;
+            logSecurityEvent('LOGIN_BLOCKED', {
+                reason: 'Account inactive',
+                user_id: user.user_id,
+                university_id
+            }, req);
+            
             return res.status(403).json({
                 success: false,
                 error: 'Account is inactive. Please contact administrator.'
@@ -58,6 +81,14 @@ const login = async (req, res) => {
 
         // Check if user has a password set
         if (!user.password_hash) {
+            loginAttempt.error_type = 'NO_PASSWORD_SET';
+            loginAttempt.user_id = user.user_id;
+            logSecurityEvent('LOGIN_FAILURE', {
+                reason: 'No password set',
+                user_id: user.user_id,
+                university_id
+            }, req);
+            
             return res.status(401).json({
                 success: false,
                 error: 'Invalid credentials'
@@ -68,6 +99,14 @@ const login = async (req, res) => {
         const isValidPassword = await bcrypt.compare(password, user.password_hash);
 
         if (!isValidPassword) {
+            loginAttempt.error_type = 'INVALID_PASSWORD';
+            loginAttempt.user_id = user.user_id;
+            logAuditEvent('LOGIN_FAILURE', {
+                reason: 'Invalid password',
+                user_id: user.user_id,
+                university_id
+            }, req);
+            
             return res.status(401).json({
                 success: false,
                 error: 'Invalid credentials'
@@ -75,22 +114,44 @@ const login = async (req, res) => {
         }
 
         // Generate token with user id, role, and department_id
-        const token = jwt.sign(
-            {
-                id: user.user_id,
-                userId: user.user_id, // Also include userId for backward compatibility
-                role: user.role,
-                department: user.department_id || null
-            },
-            process.env.JWT_SECRET,
-            { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
-        );
+        const tokenResult = generateJWTToken({
+            id: user.user_id,
+            userId: user.user_id, // Also include userId for backward compatibility
+            role: user.role,
+            department: user.department_id || null
+        });
+
+        if (!tokenResult.success) {
+            loginAttempt.error_type = 'TOKEN_GENERATION_FAILED';
+            loginAttempt.user_id = user.user_id;
+            logError('auth.login', new Error(tokenResult.error), {
+                user_id: user.user_id,
+                university_id
+            }, req);
+            
+            return res.status(500).json({
+                success: false,
+                error: 'Authentication failed. Please try again later.'
+            });
+        }
+
+        // Log successful login
+        loginAttempt.success = true;
+        loginAttempt.user_id = user.user_id;
+        const loginDuration = Date.now() - startTime;
+        logAuditEvent('LOGIN_SUCCESS', {
+            user_id: user.user_id,
+            university_id: user.university_id,
+            role: user.role,
+            department_id: user.department_id,
+            duration_ms: loginDuration
+        }, req);
 
         // Return user data (without password) and token
         res.json({
             success: true,
             message: 'Login successful',
-            token,
+            token: tokenResult.token,
             user: {
                 user_id: user.user_id,
                 university_id: user.university_id,
@@ -103,7 +164,12 @@ const login = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Login error:', error);
+        loginAttempt.error_type = 'INTERNAL_ERROR';
+        logError('auth.login', error, {
+            university_id: loginAttempt.university_id,
+            user_id: loginAttempt.user_id
+        }, req);
+        
         res.status(500).json({
             success: false,
             error: 'Internal server error'
@@ -171,12 +237,38 @@ const register = async (req, res) => {
         });
 
         // Generate token
-        const token = generateToken(user.user_id, user.role);
+        const tokenResult = generateJWTToken({
+            userId: user.user_id,
+            id: user.user_id,
+            role: user.role
+        });
+
+        if (!tokenResult.success) {
+            logError('auth.register', new Error(tokenResult.error), {
+                email,
+                user_id: user.user_id
+            }, req);
+            
+            // Delete user if token generation failed
+            await user.destroy();
+            
+            return res.status(500).json({
+                success: false,
+                error: 'Registration failed. Please try again later.'
+            });
+        }
+
+        // Log registration
+        logAuditEvent('REGISTRATION_SUCCESS', {
+            user_id: user.user_id,
+            email,
+            role: user.role
+        }, req);
 
         res.status(201).json({
             success: true,
             message: 'User registered successfully. Account pending activation.',
-            token,
+            token: tokenResult.token,
             user: {
                 user_id: user.user_id,
                 email: user.email,
@@ -186,10 +278,26 @@ const register = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Registration error:', error);
-        res.status(500).json({
+        // Determine error type for better error messages
+        let errorMessage = 'Registration failed';
+        let statusCode = 500;
+
+        if (error.name === 'SequelizeUniqueConstraintError') {
+            errorMessage = 'User with this email already exists';
+            statusCode = 409;
+        } else if (error.name === 'SequelizeValidationError') {
+            errorMessage = 'Invalid input data';
+            statusCode = 400;
+        }
+
+        logError('auth.register', error, {
+            email: req.body?.email || 'unknown',
+            error_name: error.name
+        }, req);
+        
+        res.status(statusCode).json({
             success: false,
-            error: 'Internal server error'
+            error: errorMessage
         });
     }
 };
@@ -227,7 +335,10 @@ const getMe = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Get me error:', error);
+        logError('auth.getMe', error, {
+            user_id: req.user?.user_id
+        }, req);
+        
         res.status(500).json({
             success: false,
             error: 'Internal server error'
@@ -290,7 +401,10 @@ const changePassword = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Change password error:', error);
+        logError('auth.changePassword', error, {
+            user_id: req.user?.user_id
+        }, req);
+        
         res.status(500).json({
             success: false,
             error: 'Internal server error'
@@ -314,7 +428,10 @@ const logout = async (req, res) => {
             message: 'Logout successful'
         });
     } catch (error) {
-        console.error('Logout error:', error);
+        logError('auth.logout', error, {
+            user_id: req.user?.user_id
+        }, req);
+        
         res.status(500).json({
             success: false,
             error: 'Internal server error'
@@ -343,7 +460,10 @@ const verifyToken = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Verify token error:', error);
+        logError('auth.verifyToken', error, {
+            user_id: req.user?.user_id
+        }, req);
+        
         res.status(500).json({
             success: false,
             error: 'Internal server error'

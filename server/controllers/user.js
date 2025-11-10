@@ -1,9 +1,10 @@
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 const { User } = require('../models');
 const { Op } = require('sequelize');
 const path = require('path');
 const fs = require('fs');
+const { generateToken: generateJWTToken } = require('../utils/jwt');
+const { logAuditEvent, logError, logSecurityEvent } = require('../utils/logger');
 
 /**
  * Register user (only through invitation)
@@ -76,10 +77,27 @@ const registerUser = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Registration error:', error);
-        res.status(500).json({
+        // Determine error type for better error messages
+        let errorMessage = 'Registration failed';
+        let statusCode = 500;
+
+        if (error.name === 'SequelizeUniqueConstraintError') {
+            errorMessage = 'User with this email or university ID already exists';
+            statusCode = 409;
+        } else if (error.name === 'SequelizeValidationError') {
+            errorMessage = 'Invalid input data';
+            statusCode = 400;
+        }
+
+        logError('user.registerUser', error, {
+            email: req.body?.email || 'unknown',
+            university_id: req.body?.university_id || 'unknown',
+            error_name: error.name
+        }, req);
+        
+        res.status(statusCode).json({
             success: false,
-            error: 'Registration failed'
+            error: errorMessage
         });
     }
 };
@@ -90,11 +108,24 @@ const registerUser = async (req, res) => {
  * Requires university_id (format: "20xx/xxxxx") and password
  */
 const loginUser = async (req, res) => {
+    const startTime = Date.now();
+    let loginAttempt = {
+        university_id: req.body?.university_id || 'unknown',
+        success: false,
+        error_type: null
+    };
+
     try {
         const { university_id, password } = req.body;
 
         // Validation - require university_id and password
         if (!university_id || !password) {
+            loginAttempt.error_type = 'MISSING_CREDENTIALS';
+            logAuditEvent('LOGIN_FAILURE', {
+                reason: 'Missing credentials',
+                university_id: university_id || 'not_provided'
+            }, req);
+            
             return res.status(400).json({
                 success: false,
                 error: 'University ID and password are required'
@@ -106,6 +137,12 @@ const loginUser = async (req, res) => {
         const user = await User.findOne({ where: { university_id } });
 
         if (!user) {
+            loginAttempt.error_type = 'USER_NOT_FOUND';
+            logAuditEvent('LOGIN_FAILURE', {
+                reason: 'User not found',
+                university_id
+            }, req);
+            
             return res.status(404).json({
                 success: false,
                 error: 'User not found with this university ID'
@@ -114,6 +151,14 @@ const loginUser = async (req, res) => {
 
         // Check if user has a password set
         if (!user.password_hash) {
+            loginAttempt.error_type = 'NO_PASSWORD_SET';
+            loginAttempt.user_id = user.user_id;
+            logSecurityEvent('LOGIN_FAILURE', {
+                reason: 'No password set',
+                user_id: user.user_id,
+                university_id
+            }, req);
+            
             return res.status(401).json({
                 success: false,
                 error: 'User has no password set'
@@ -123,6 +168,14 @@ const loginUser = async (req, res) => {
         // Verify password
         const valid = await bcrypt.compare(password, user.password_hash);
         if (!valid) {
+            loginAttempt.error_type = 'INVALID_PASSWORD';
+            loginAttempt.user_id = user.user_id;
+            logAuditEvent('LOGIN_FAILURE', {
+                reason: 'Invalid password',
+                user_id: user.user_id,
+                university_id
+            }, req);
+            
             return res.status(401).json({
                 success: false,
                 error: 'Invalid password'
@@ -131,6 +184,14 @@ const loginUser = async (req, res) => {
 
         // Check if user is active
         if (!user.is_active) {
+            loginAttempt.error_type = 'ACCOUNT_INACTIVE';
+            loginAttempt.user_id = user.user_id;
+            logSecurityEvent('LOGIN_BLOCKED', {
+                reason: 'Account inactive',
+                user_id: user.user_id,
+                university_id
+            }, req);
+            
             return res.status(403).json({
                 success: false,
                 error: 'Account is inactive. Please contact the administrator.'
@@ -138,21 +199,43 @@ const loginUser = async (req, res) => {
         }
 
         // Generate token with user id, role, and department_id
-        const token = jwt.sign(
-            {
-                id: user.user_id,
-                userId: user.user_id,
-                role: user.role,
-                department: user.department_id || null
-            },
-            process.env.JWT_SECRET,
-            { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
-        );
+        const tokenResult = generateJWTToken({
+            id: user.user_id,
+            userId: user.user_id,
+            role: user.role,
+            department: user.department_id || null
+        });
+
+        if (!tokenResult.success) {
+            loginAttempt.error_type = 'TOKEN_GENERATION_FAILED';
+            loginAttempt.user_id = user.user_id;
+            logError('user.loginUser', new Error(tokenResult.error), {
+                user_id: user.user_id,
+                university_id
+            }, req);
+            
+            return res.status(500).json({
+                success: false,
+                error: 'Authentication failed. Please try again later.'
+            });
+        }
+
+        // Log successful login
+        loginAttempt.success = true;
+        loginAttempt.user_id = user.user_id;
+        const loginDuration = Date.now() - startTime;
+        logAuditEvent('LOGIN_SUCCESS', {
+            user_id: user.user_id,
+            university_id: user.university_id,
+            role: user.role,
+            department_id: user.department_id,
+            duration_ms: loginDuration
+        }, req);
 
         res.json({
             success: true,
             message: 'Login successful',
-            token,
+            token: tokenResult.token,
             user: {
                 user_id: user.user_id,
                 university_id: user.university_id,
@@ -163,10 +246,15 @@ const loginUser = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Login error:', error);
+        loginAttempt.error_type = 'INTERNAL_ERROR';
+        logError('user.loginUser', error, {
+            university_id: loginAttempt.university_id,
+            user_id: loginAttempt.user_id
+        }, req);
+        
         res.status(500).json({
             success: false,
-            error: 'Login failed'
+            error: 'Internal server error'
         });
     }
 };
@@ -188,10 +276,13 @@ const logoutUser = async (req, res) => {
             message: 'Logout successful'
         });
     } catch (error) {
-        console.error('Logout error:', error);
+        logError('user.logoutUser', error, {
+            user_id: req.user?.user_id
+        }, req);
+        
         res.status(500).json({
             success: false,
-            error: 'Failed to logout'
+            error: 'Internal server error'
         });
     }
 };
@@ -228,10 +319,13 @@ const getProfile = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Get profile error:', error);
+        logError('user.getProfile', error, {
+            user_id: req.user?.user_id
+        }, req);
+        
         res.status(500).json({
             success: false,
-            error: 'Failed to fetch profile'
+            error: 'Internal server error'
         });
     }
 };
@@ -303,10 +397,13 @@ const updateProfile = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Update profile error:', error);
+        logError('user.updateProfile', error, {
+            user_id: req.user?.user_id
+        }, req);
+        
         res.status(500).json({
             success: false,
-            error: 'Failed to update profile'
+            error: 'Internal server error'
         });
     }
 };
@@ -356,10 +453,13 @@ const addScore = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Add score error:', error);
+        logError('user.addScore', error, {
+            user_id: req.body?.user_id
+        }, req);
+        
         res.status(500).json({
             success: false,
-            error: 'Failed to update score'
+            error: 'Internal server error'
         });
     }
 };
