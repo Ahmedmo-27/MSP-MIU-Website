@@ -6,14 +6,32 @@ import ApiService from '../services/api';
 import './LoginCard.css';
 
 const LoginCard = memo(({ isOpen, onClose }) => {
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState({ university_id: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
   const handleInputChange = useCallback((e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    let processedValue = value;
+    
+    // Format university_id input (xxxx/xxxxx)
+    if (name === 'university_id') {
+      // Remove all non-digits
+      const digitsOnly = value.replace(/\D/g, '');
+      
+      // Format as xxxx/xxxxx
+      if (digitsOnly.length <= 4) {
+        processedValue = digitsOnly;
+      } else if (digitsOnly.length <= 9) {
+        processedValue = `${digitsOnly.slice(0, 4)}/${digitsOnly.slice(4)}`;
+      } else {
+        // Limit to 10 digits total (4 + 5)
+        processedValue = `${digitsOnly.slice(0, 4)}/${digitsOnly.slice(4, 9)}`;
+      }
+    }
+    
+    setFormData(prev => ({ ...prev, [name]: processedValue }));
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
@@ -30,10 +48,10 @@ const LoginCard = memo(({ isOpen, onClose }) => {
     // Basic validation
     const newErrors = {};
     
-    if (!formData.email) {
-      newErrors.email = 'Email is required';
-    } else if (!formData.email.includes('@')) {
-      newErrors.email = 'Please enter a valid email address';
+    if (!formData.university_id) {
+      newErrors.university_id = 'University ID is required';
+    } else if (!/^\d{4}\/\d{5}$/.test(formData.university_id)) {
+      newErrors.university_id = 'Format: xxxx/xxxxx (e.g. 20xx/12345)';
     }
     
     if (!formData.password) {
@@ -50,26 +68,29 @@ const LoginCard = memo(({ isOpen, onClose }) => {
     setLoading(true);
     
     try {
-      const result = await ApiService.login(formData.email, formData.password);
-      setFormData({ email: '', password: '' });
+      const result = await ApiService.login(formData.university_id, formData.password);
+      setFormData({ university_id: '', password: '' });
       setErrors({});
       onClose();
       if (result.user) {
-        alert(`Welcome back, ${result.user.name || result.user.email}!`);
-        window.location.href = '/registeration-admin';
+        const displayName = result.user.full_name || result.user.university_id || 'User';
+        alert(`Welcome back, ${displayName}!`);
+        window.location.href = '/profile';
       } else {
         alert('Login successful!');
       }
     } catch (error) {
       const msg = error.message || '';
       if (msg.includes('Invalid credentials') || msg.includes('Unauthorized')) {
-        setErrors({ email: 'Invalid email or password' });
-      } else if (msg.includes('User not found')) {
-        setErrors({ email: 'No account found with this email' });
+        setErrors({ university_id: 'Invalid university ID or password' });
+      } else if (msg.includes('User not found') || msg.includes('not found')) {
+        setErrors({ university_id: 'No account found with this university ID' });
+      } else if (msg.includes('Invalid university ID format')) {
+        setErrors({ university_id: 'Format: xxxx/xxxxx (e.g. 20xx/12345)' });
       } else if (msg.includes('Network') || msg.includes('fetch')) {
-        setErrors({ email: 'Network error. Please check your connection.' });
+        setErrors({ university_id: 'Network error. Please check your connection.' });
       } else {
-        setErrors({ email: msg || 'Login failed. Please try again.' });
+        setErrors({ university_id: msg || 'Login failed. Please try again.' });
       }
     } finally {
       setLoading(false);
@@ -122,19 +143,19 @@ const LoginCard = memo(({ isOpen, onClose }) => {
 
           <form className="login-form" onSubmit={handleSubmit}>
             <div className="input-group">
-              <label htmlFor="email" className="input-label">Email</label>
+              <label htmlFor="university_id" className="input-label">University ID</label>
               <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
+                type="text"
+                id="university_id"
+                name="university_id"
+                value={formData.university_id}
                 onChange={handleInputChange}
-                placeholder="Enter your email"
-                className={`login-input ${errors.email ? 'error' : ''}`}
+                placeholder="20xx/12345"
+                className={`login-input ${errors.university_id ? 'error' : ''}`}
                 required
-                autoComplete="email"
+                autoComplete="username"
               />
-              {errors.email && <span className="error-message">{errors.email}</span>}
+              {errors.university_id && <span className="error-message">{errors.university_id}</span>}
             </div>
 
             <div className="input-group">

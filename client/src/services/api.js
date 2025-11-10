@@ -59,14 +59,14 @@ class ApiService {
   }
 
   // Login method
-  static async login(email, password) {
+  static async login(university_id, password) {
     try {
-      console.log('API Service - Attempting login for:', email);
+      console.log('API Service - Attempting login for university ID:', university_id);
       
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: this.getHeaders(),
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ university_id, password }),
       });
 
       const result = await response.json();
@@ -95,15 +95,38 @@ class ApiService {
         headers: this.getHeaders(true),
       });
 
-      // Remove token regardless of response
+      // Parse response if available
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Logout successful:', result.message);
+      }
+      
+      // Remove token regardless of response (client-side logout)
       this.removeAuthToken();
       
-      return response.ok;
+      return true;
     } catch (error) {
       console.error('Error during logout:', error);
-      // Remove token even if logout fails
+      // Remove token even if logout fails (ensure client-side logout)
       this.removeAuthToken();
-      return false;
+      return true; // Return true since token is removed client-side
+    }
+  }
+
+
+  static async getProfile() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/profile`, {
+        headers: this.getHeaders(true),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch profile');
+        }
+        const result = await response.json();
+        return result.user;
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      throw error;
     }
   }
 

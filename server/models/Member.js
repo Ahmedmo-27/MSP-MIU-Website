@@ -77,10 +77,18 @@ const Member = sequelize.define('Member', {
         }
       }
     }
+  },
+  user_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'users',
+      key: 'user_id'
+    }
   }
 }, {
   tableName: 'members',
-  timestamps: false, // No updated_at in the actual schema
+  timestamps: false,
   createdAt: 'joined_at',
   updatedAt: false
 });

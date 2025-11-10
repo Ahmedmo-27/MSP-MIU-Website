@@ -6,6 +6,11 @@ const Member = require('./Member');
 const Session = require('./Session');
 const Attendance = require('./Attendance');
 const Event = require('./Event');
+const User = require('./User');
+const PasswordToken = require('./PasswordToken');
+const Leaderboard = require('./Leaderboard');
+const Sponsor = require('./Sponsor');
+const Suggestion = require('./Suggestion');
 
 // Initialize models
 const models = {
@@ -15,7 +20,12 @@ const models = {
   Member,
   Session,
   Attendance,
-  Event
+  Event,
+  User,
+  PasswordToken,
+  Leaderboard,
+  Sponsor,
+  Suggestion
 };
 
 // Set up associations
@@ -76,6 +86,62 @@ Session.hasMany(Attendance, {
 Member.hasMany(Attendance, {
   foreignKey: 'member_id',
   as: 'attendances'
+});
+
+// User associations
+User.belongsTo(Department, {
+  foreignKey: 'department_id',
+  as: 'department',
+  allowNull: true
+});
+Department.hasMany(User, {
+  foreignKey: 'department_id',
+  as: 'users'
+});
+User.hasMany(Member, {
+  foreignKey: 'user_id',
+  as: 'member'
+});
+User.hasMany(Board, {
+  foreignKey: 'user_id',
+  as: 'boardMember'
+});
+User.hasMany(PasswordToken, {
+  foreignKey: 'user_id',
+  as: 'passwordTokens'
+});
+
+Member.belongsTo(User, {
+  foreignKey: 'user_id',
+  as: 'user'
+});
+Board.belongsTo(User, {
+  foreignKey: 'user_id',
+  as: 'user'
+});
+PasswordToken.belongsTo(User, {
+  foreignKey: 'user_id',
+  as: 'user'
+});
+
+// Leaderboard associations
+Leaderboard.belongsTo(Member, {
+  foreignKey: 'member_id',
+  as: 'member'
+});
+Member.hasOne(Leaderboard, {
+  foreignKey: 'member_id',
+  as: 'leaderboard'
+});
+
+// Suggestion associations
+Suggestion.belongsTo(Member, {
+  foreignKey: 'member_id',
+  as: 'member'
+});
+Member.hasMany(Suggestion, {
+  foreignKey: 'member_id',
+  as: 'suggestions'
 });
 
 // Sync models with database

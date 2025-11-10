@@ -23,7 +23,7 @@ const Application = sequelize.define('Application', {
     }
   },
   email: {
-    type: DataTypes.STRING(100),
+    type: DataTypes.STRING(150),
     allowNull: false,
     validate: {
       isEmail: true,
@@ -81,17 +81,14 @@ const Application = sequelize.define('Application', {
   },
   interview: {
     type: DataTypes.ENUM('on-campus', 'online'),
-    allowNull: false,
-    validate: {
-      notEmpty: true
-    }
+    allowNull: true
   },
   status: {
     type: DataTypes.ENUM('pending', 'approved', 'rejected'),
     defaultValue: 'pending'
   },
   comment: {
-    type: DataTypes.TEXT,
+    type: DataTypes.STRING(500),
     allowNull: true
   },
   created_at: {
@@ -102,7 +99,7 @@ const Application = sequelize.define('Application', {
   tableName: 'applications',
   timestamps: true,
   createdAt: 'created_at',
-  updatedAt: false // No updated_at in the actual schema
+  updatedAt: false
 });
 
 module.exports = Application;

@@ -14,7 +14,7 @@ const Suggestions = lazy(() => import('./pages/Suggestions'));
 const Leaderboard = lazy(() => import('./pages/Leaderboard'));
 const Sponsors = lazy(() => import('./pages/Sponsors'));
 const FormAdmin = lazy(() => import('./pages/FormAdmin'));
-const App = lazy(() => import('./App'));
+const Profile = lazy(() => import('./pages/Profile'));
 
 // Enhanced loading component with better UX
 const PageLoader = () => (
@@ -52,7 +52,7 @@ const AppRouter = () => (
         <Route path="/" element={<SiteLayout><Home /></SiteLayout>} />
         <Route path="/about" element={<SiteLayout><AboutUs /></SiteLayout>} />
         <Route path="/Meet-the-board" element={<SiteLayout><Board /></SiteLayout>} />
-        <Route path="/become-member" element={<SiteLayout><BecomeMember /></SiteLayout>} />
+        <Route path="/become-member" element={<BecomeMember />} />
         <Route path="/login" element={<SiteLayout><Login /></SiteLayout>} />
         <Route path="/exercises" element={<SiteLayout><Exercises /></SiteLayout>} />
         <Route path="/events" element={<SiteLayout><Events /></SiteLayout>} />
@@ -60,6 +60,7 @@ const AppRouter = () => (
         <Route path="/leaderboard" element={<SiteLayout><Leaderboard /></SiteLayout>} />
         <Route path="/sponsors" element={<SiteLayout><Sponsors /></SiteLayout>} />
         <Route path="/registration-admin" element={<SiteLayout><FormAdmin /></SiteLayout>} />
+        <Route path="/profile" element={<SiteLayout><Profile /></SiteLayout>} />
       </Routes>
     </Suspense>
   </Router>
